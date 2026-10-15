@@ -1,0 +1,7 @@
+timestamp_utc,date,type,market_title,market_slug,condition_id,outcome,side,shares,price,usd_size,cash_flow_usd,transaction_hash,asset
+2026-09-01T15:20:11Z,2026-09-01,TRADE,Chiefs win Super Bowl LXI?,chiefs-win-super-bowl-lxi,0xabc1,Yes,Buy,555.56,0.18,100.00,-100.00,0x111,123
+2026-10-10T12:00:00Z,2026-10-10,TRADE,Bitcoin above $150k on Dec 31?,bitcoin-above-150k-dec-31,0xabc2,No,Buy,56.34,0.71,40.00,-40.00,0x222,456
+2026-10-05T18:00:00Z,2026-10-05,TRADE,Dodgers win the World Series?,dodgers-win-world-series,0xabc3,Yes,Sell,83.33,0.40,33.33,33.33,0x333,789
+2026-10-02T09:00:00Z,2026-10-02,REDEEM,Government shutdown by Oct 1?,government-shutdown-oct-1,0xabc4,No,,109.09,1.00,109.09,109.09,0x444,135
+2026-08-30T08:00:00Z,2026-08-30,DEPOSIT,,,,,,,,,250.00,0x555,
+2026-10-11T12:00:00Z,2026-10-11,TRADE,Odd row with no price,odd-row,0xabc5,Yes,Buy,10,,,,0x666,246

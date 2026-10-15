@@ -1,0 +1,5 @@
+fill_id,ticker,side,action,count_fp,yes_price_dollars,no_price_dollars,fee_cost,created_time
+f1,KXFEDCUT-26DEC,yes,buy,80.00,0.6200,0.3800,0.70,2026-10-02T14:05:00Z
+f2,KXBTC-26DEC31-150K,no,buy,56.34,0.2900,0.7100,0.00,2026-10-10T09:00:00Z
+f3,KXFEDCUT-26DEC,yes,sell,20.00,0.7000,0.3000,0.10,2026-10-12T10:00:00Z
+f4,KXNYC-TEMP-26OCT20,yes,buy,,0.3500,0.6500,0.20,2026-10-14T08:00:00Z

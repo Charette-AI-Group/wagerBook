@@ -44,6 +44,14 @@ manualTimeoutSeconds = 3.0
 
 appDataDir = Path(os.environ.get("APPDATA", str(Path.home()))) / appName
 settingsFile = appDataDir / "settings.ini"
+# The book itself: every wager, open or closed, in one JSON file.
+wagersFile = appDataDir / "wagers.json"
+# Offered in the Category box; anything else can be typed in.
+wagerCategories = [
+    "Politics", "Economics", "Sports", "Crypto", "Science", "Entertainment",
+    "Weather", "World", "Other",
+]
 windowTitle = appName
-defaultWindowWidth = 800
-defaultWindowHeight = 600
+# Wide enough for the Active tab's fifteen columns without scrolling at once.
+defaultWindowWidth = 1280
+defaultWindowHeight = 640

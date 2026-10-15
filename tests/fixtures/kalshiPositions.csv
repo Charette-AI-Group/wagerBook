@@ -1,0 +1,5 @@
+market_ticker,side,contracts,open_timestamp,close_timestamp,entry_price_cents,exit_price_cents,open_fees_cents,close_fees_cents,realized_pnl_cents
+KXSHUTDOWN-26OCT01,no,109,2026-09-12T10:00:00-04:00,2026-10-01T20:00:00-04:00,55,100,80,0,4825
+KXCPI-26SEP-3.0,yes,67,2026-09-20T11:30:00-04:00,2026-10-10T08:30:00-04:00,45,0,40,0,-3055
+KXDODGERS-26WS,yes,83,2026-08-15T09:00:00-04:00,2026-10-05T15:00:00-04:00,30,40,0,0,830
+KXFEDCUT-26DEC,yes,80,2026-10-02T14:05:00-04:00,,62,,70,,

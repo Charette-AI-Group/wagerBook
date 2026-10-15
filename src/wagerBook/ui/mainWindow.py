@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from functools import partial
+from pathlib import Path
 
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import (
@@ -13,18 +14,21 @@ from PySide6.QtGui import (
     QKeySequence,
 )
 from PySide6.QtWidgets import (
+    QFileDialog,
     QMainWindow,
     QMessageBox,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
 )
 
 from wagerBook import appConfig
 from wagerBook.services import themeService
+from wagerBook.services.exportCsvService import exportCsv
+from wagerBook.services.importService import ImportFileError, ImportResult, readImportFile
 from wagerBook.services.manualWorker import ManualWorker
+from wagerBook.services.wagerStore import WagerStore, WagerStoreError
 from wagerBook.ui.dialogs.aboutDialog import showAbout
 from wagerBook.ui.dialogs.errorDialog import showError
+from wagerBook.ui.dialogs.importDialog import confirmImport
+from wagerBook.ui.wagers.wagerBookView import WagerBookView
 from wagerBook.ui.widgets.reportingView import ReportingView
 
 
@@ -38,35 +42,29 @@ class MainWindow(QMainWindow):
         self.buildMenuBar()
         self.showStatus("Ready")
 
-        self.greetButton = QPushButton("Say Hello")
-        self.greetButton.clicked.connect(self.onGreetClicked)
-
-        centralWidget = QWidget()
-        layout = QVBoxLayout(centralWidget)
-        layout.addWidget(self.greetButton)
-        layout.addStretch()
-
-        self.setCentralWidget(centralWidget)
+        self.store = WagerStore(appConfig.wagersFile)
+        self.bookView = WagerBookView(self.store)
+        self.connectView(self.bookView)
+        self.setCentralWidget(self.bookView)
+        self.bookView.loadBook()
 
     def buildMenuBar(self) -> None:
         # Menus are kept as attributes: features can extend them later, and it
         # prevents the Python wrappers from being garbage-collected.
         fileMenu = self.fileMenu = self.menuBar().addMenu("&File")
 
-        self.newAction = QAction("&New", self)
-        self.newAction.setShortcut(QKeySequence.StandardKey.New)
-        self.newAction.triggered.connect(self.onFileNew)
-        fileMenu.addAction(self.newAction)
+        self.newWagerAction = QAction("&New Wager...", self)
+        self.newWagerAction.setShortcut(QKeySequence.StandardKey.New)
+        self.newWagerAction.triggered.connect(self.onFileNewWager)
+        fileMenu.addAction(self.newWagerAction)
 
-        self.openAction = QAction("&Open...", self)
-        self.openAction.setShortcut(QKeySequence.StandardKey.Open)
-        self.openAction.triggered.connect(self.onFileOpen)
-        fileMenu.addAction(self.openAction)
+        self.importCsvAction = QAction("&Import CSV...", self)
+        self.importCsvAction.triggered.connect(self.onFileImportCsv)
+        fileMenu.addAction(self.importCsvAction)
 
-        self.saveAction = QAction("&Save", self)
-        self.saveAction.setShortcut(QKeySequence.StandardKey.Save)
-        self.saveAction.triggered.connect(self.onFileSave)
-        fileMenu.addAction(self.saveAction)
+        self.exportCsvAction = QAction("&Export CSV...", self)
+        self.exportCsvAction.triggered.connect(self.onFileExportCsv)
+        fileMenu.addAction(self.exportCsvAction)
 
         fileMenu.addSeparator()
 
@@ -126,15 +124,67 @@ class MainWindow(QMainWindow):
         else:
             self.showStatus(f"{theme.capitalize()} theme applied.")
 
-    # Placeholder slots — replace the bodies with your app's file handling.
-    def onFileNew(self) -> None:
-        self.showStatus("File > New selected")
+    def onFileNewWager(self) -> None:
+        self.bookView.onAdd()
 
-    def onFileOpen(self) -> None:
-        self.showStatus("File > Open selected")
+    def chooseImportPath(self) -> str:
+        """A method so tests can answer without a file dialog opening."""
+        path, _filter = QFileDialog.getOpenFileName(
+            self, "Import CSV", "", "CSV files (*.csv);;All files (*)"
+        )
+        return path
 
-    def onFileSave(self) -> None:
-        self.showStatus("File > Save selected")
+    def previewImport(self, result: ImportResult) -> bool:
+        """Likewise: the preview is modal, so tests answer it here."""
+        return confirmImport(self, result)
+
+    def onFileImportCsv(self) -> None:
+        path = self.chooseImportPath()
+        if not path:
+            self.showStatus("Import cancelled.")
+            return
+        try:
+            result = readImportFile(Path(path), self.store.wagers)
+        except ImportFileError as exc:
+            self.showError("Import CSV", str(exc))
+            return
+        if not self.previewImport(result):
+            self.showStatus("Import cancelled.")
+            return
+        try:
+            self.store.addMany(result.toAdd)
+        except WagerStoreError as exc:
+            self.showError("Wager Book", str(exc))
+        self.bookView.refresh()
+        self.showStatus(
+            f"Imported {len(result.toAdd)} wagers from {Path(path).name}"
+            f" ({len(result.duplicates)} already in the book, "
+            f"{len(result.skipped)} rows left out)."
+        )
+
+    def chooseExportPath(self) -> str:
+        """A method so tests can answer without a file dialog opening."""
+        path, _filter = QFileDialog.getSaveFileName(
+            self, "Export CSV", "wagers.csv", "CSV files (*.csv);;All files (*)"
+        )
+        return path
+
+    def onFileExportCsv(self) -> None:
+        path = self.chooseExportPath()
+        if not path:
+            self.showStatus("Export cancelled.")
+            return
+        try:
+            count = exportCsv(self.store.wagers, Path(path))
+        except OSError as exc:
+            self.showError(
+                "Export CSV",
+                f"Could not write the CSV file. {exc}\n"
+                f"The path was {path}. Check that the folder exists and the file "
+                "is not open in another program.",
+            )
+            return
+        self.showStatus(f"Exported {count} wagers to {path}")
 
     def onHelpManual(self) -> None:
         """Open the manual, preferring the published copy when there is one.
@@ -191,6 +241,3 @@ class MainWindow(QMainWindow):
             self.showStatus(
                 "Thank you - the donation page is opening in your browser."
             )
-
-    def onGreetClicked(self) -> None:
-        self.showStatus("Hello from Wager Book")

@@ -21,6 +21,7 @@ def qapp() -> QApplication:
 def isolatedSettings(tmp_path, monkeypatch):
     """Keep tests out of the real %APPDATA% settings file."""
     monkeypatch.setattr(appConfig, "settingsFile", tmp_path / "settings.ini")
+    monkeypatch.setattr(appConfig, "wagersFile", tmp_path / "wagers.json")
 
 
 @pytest.fixture(autouse=True)

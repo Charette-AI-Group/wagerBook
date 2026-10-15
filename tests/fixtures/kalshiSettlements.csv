@@ -1,0 +1,3 @@
+ticker,event_ticker,market_result,yes_count_fp,yes_total_cost_dollars,no_count_fp,no_total_cost_dollars,revenue,settled_time,fee_cost
+KXSHUTDOWN-26OCT01,KXSHUTDOWN,no,0.00,0.0000,109.00,59.9500,10900,2026-10-01T20:00:00Z,0.8000
+KXCPI-26SEP-3.0,KXCPI,no,67.00,30.1500,0.00,0.0000,0,2026-10-10T12:30:00Z,0.4000

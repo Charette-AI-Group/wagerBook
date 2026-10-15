@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeySequence
 
 from wagerBook import appConfig
+from wagerBook.models.wager import Status, Wager
 from wagerBook.services import themeService
+from wagerBook.services.importService import ImportResult
 from wagerBook.ui.mainWindow import MainWindow
 
 
@@ -20,14 +24,13 @@ def testMainWindowOpens(qtbot) -> None:
     assert mainWindow.statusBar().currentMessage() == "Ready"
 
 
-def testGreetButtonUpdatesLabel(qtbot) -> None:
+def testTheBookIsTheCentralWidget(qtbot) -> None:
     mainWindow = MainWindow()
     qtbot.addWidget(mainWindow)
-    mainWindow.show()
 
-    qtbot.mouseClick(mainWindow.greetButton, Qt.MouseButton.LeftButton)
-
-    assert mainWindow.statusBar().currentMessage() == "Hello from Wager Book"
+    assert mainWindow.centralWidget() is mainWindow.bookView
+    assert [mainWindow.bookView.tabs.tabText(i) for i in range(2)] == ["Active", "History"]
+    assert mainWindow.store.path == appConfig.wagersFile
 
 
 def testMenuBarStructure(qtbot) -> None:
@@ -38,7 +41,7 @@ def testMenuBarStructure(qtbot) -> None:
     assert menuTitles == ["&File", "&Help"]
 
     fileItems = [a.text() for a in mainWindow.fileMenu.actions() if not a.isSeparator()]
-    assert fileItems == ["&New", "&Open...", "&Save", "E&xit"]
+    assert fileItems == ["&New Wager...", "&Import CSV...", "&Export CSV...", "E&xit"]
     assert any(a.isSeparator() for a in mainWindow.fileMenu.actions())
 
     helpItems = [a.text() for a in mainWindow.helpMenu.actions() if not a.isSeparator()]
@@ -82,18 +85,149 @@ def testSavedThemeIsRestoredOnNextLaunch(qtbot) -> None:
     assert reopened.themeActions[themeService.lightTheme].isChecked()
 
 
-def testFileMenuPlaceholdersUpdateStatus(qtbot) -> None:
+def testNewWagerOpensTheAddDialog(qtbot, monkeypatch) -> None:
+    mainWindow = MainWindow()
+    qtbot.addWidget(mainWindow)
+    monkeypatch.setattr(
+        "wagerBook.ui.wagers.wagerBookView.editWager",
+        lambda parent, wager: Wager(title="From the menu", stake=5.0, price=0.5),
+    )
+
+    mainWindow.newWagerAction.trigger()
+
+    assert [w.title for w in mainWindow.store.wagers] == ["From the menu"]
+    assert mainWindow.statusBar().currentMessage() == "Added: From the menu"
+
+
+def testExportCsvWritesTheWholeBook(qtbot, monkeypatch, tmp_path) -> None:
+    mainWindow = MainWindow()
+    qtbot.addWidget(mainWindow)
+    mainWindow.store.add(Wager(title="Open", stake=5.0, price=0.5))
+    mainWindow.store.add(Wager(title="Done", stake=5.0, price=0.5, status=Status.lost, payout=0.0))
+    target = tmp_path / "out.csv"
+    monkeypatch.setattr(MainWindow, "chooseExportPath", lambda self: str(target))
+
+    mainWindow.exportCsvAction.trigger()
+
+    assert target.exists()
+    assert "Exported 2 wagers" in mainWindow.statusBar().currentMessage()
+
+
+def testACancelledExportSaysSo(qtbot, monkeypatch) -> None:
+    mainWindow = MainWindow()
+    qtbot.addWidget(mainWindow)
+    monkeypatch.setattr(MainWindow, "chooseExportPath", lambda self: "")
+
+    mainWindow.exportCsvAction.trigger()
+
+    assert mainWindow.statusBar().currentMessage() == "Export cancelled."
+
+
+def testAnUnwritableExportGoesToADialog(qtbot, monkeypatch, tmp_path) -> None:
+    mainWindow = MainWindow()
+    qtbot.addWidget(mainWindow)
+    monkeypatch.setattr(
+        MainWindow, "chooseExportPath", lambda self: str(tmp_path / "missing" / "out.csv")
+    )
+    shown: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        MainWindow, "showError", lambda self, title, message: shown.append((title, message))
+    )
+
+    mainWindow.exportCsvAction.trigger()
+
+    assert shown and shown[0][0] == "Export CSV"
+    assert "out.csv" in shown[0][1]
+
+
+fixtures = Path(__file__).resolve().parents[1] / "fixtures"
+
+
+def testImportAddsThePreviewedWagersOnOk(qtbot, monkeypatch) -> None:
+    mainWindow = MainWindow()
+    qtbot.addWidget(mainWindow)
+    monkeypatch.setattr(
+        MainWindow, "chooseImportPath", lambda self: str(fixtures / "kalshiFills.csv")
+    )
+    previewed: list[ImportResult] = []
+    monkeypatch.setattr(
+        MainWindow, "previewImport", lambda self, result: previewed.append(result) or True
+    )
+
+    mainWindow.importCsvAction.trigger()
+
+    assert len(previewed) == 1 and len(previewed[0].toAdd) == 2
+    assert sorted(w.ticker for w in mainWindow.store.wagers) == [
+        "KXBTC-26DEC31-150K", "KXFEDCUT-26DEC"
+    ]
+    assert len(mainWindow.bookView.activeTable.tableModel.wagers) == 2
+    message = mainWindow.statusBar().currentMessage()
+    assert "Imported 2 wagers from kalshiFills.csv" in message
+    assert "2 rows left out" in message
+    # It reached the file, not just the window.
+    assert appConfig.wagersFile.exists()
+
+
+def testImportingTheSameFileAgainAddsNothing(qtbot, monkeypatch) -> None:
+    mainWindow = MainWindow()
+    qtbot.addWidget(mainWindow)
+    monkeypatch.setattr(
+        MainWindow, "chooseImportPath", lambda self: str(fixtures / "kalshiFills.csv")
+    )
+    monkeypatch.setattr(MainWindow, "previewImport", lambda self, result: True)
+
+    mainWindow.importCsvAction.trigger()
+    mainWindow.importCsvAction.trigger()
+
+    assert len(mainWindow.store.wagers) == 2
+    assert "Imported 0 wagers" in mainWindow.statusBar().currentMessage()
+    assert "2 already in the book" in mainWindow.statusBar().currentMessage()
+
+
+def testACancelledPreviewImportsNothing(qtbot, monkeypatch) -> None:
+    mainWindow = MainWindow()
+    qtbot.addWidget(mainWindow)
+    monkeypatch.setattr(
+        MainWindow, "chooseImportPath", lambda self: str(fixtures / "kalshiFills.csv")
+    )
+    monkeypatch.setattr(MainWindow, "previewImport", lambda self, result: False)
+
+    mainWindow.importCsvAction.trigger()
+
+    assert mainWindow.store.wagers == []
+    assert mainWindow.statusBar().currentMessage() == "Import cancelled."
+
+
+def testAnUnreadableImportGoesToADialog(qtbot, monkeypatch, tmp_path) -> None:
+    mainWindow = MainWindow()
+    qtbot.addWidget(mainWindow)
+    monkeypatch.setattr(
+        MainWindow, "chooseImportPath", lambda self: str(tmp_path / "missing.csv")
+    )
+    shown: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        MainWindow, "showError", lambda self, title, message: shown.append((title, message))
+    )
+
+    mainWindow.importCsvAction.trigger()
+
+    assert shown and shown[0][0] == "Import CSV"
+    assert "missing.csv" in shown[0][1]
+
+
+def testACorruptBookIsReportedNotFatal(qtbot, monkeypatch) -> None:
+    appConfig.wagersFile.write_text("{broken", encoding="utf-8")
+    shown: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        MainWindow, "showError", lambda self, title, message: shown.append((title, message))
+    )
+
     mainWindow = MainWindow()
     qtbot.addWidget(mainWindow)
 
-    mainWindow.newAction.trigger()
-    assert mainWindow.statusBar().currentMessage() == "File > New selected"
-
-    mainWindow.openAction.trigger()
-    assert mainWindow.statusBar().currentMessage() == "File > Open selected"
-
-    mainWindow.saveAction.trigger()
-    assert mainWindow.statusBar().currentMessage() == "File > Save selected"
+    assert shown and shown[0][0] == "Wager Book"
+    assert str(appConfig.wagersFile) in shown[0][1]
+    assert mainWindow.store.wagers == []
 
 
 def testAboutOpensTheDialogAndReportsADonation(qtbot, monkeypatch) -> None:
