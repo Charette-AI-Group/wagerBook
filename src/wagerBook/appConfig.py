@@ -30,15 +30,11 @@ resourcesDir = Path(__file__).resolve().parent / "resources"
 # Help > User Manual. The copy in the checkout is what a new app has, and it is
 # enough: the menu item works from the first run rather than being a promise.
 manualPath = projectRoot / "docs" / "manual" / "README.md"
-# Publishing is opt-in. Set this once the manual is pushed somewhere that
-# renders markdown - GitHub shows screenshots that a local .md opened in an
-# editor does not - and the published copy becomes the preferred one, with the
-# local copy as the offline fallback. Left empty it stays local and no network
-# request is made at all, which is the honest default: a new app has nothing
-# published yet, and deriving a URL from repoUrl would hand most apps an
-# address that 404s and a wait to discover it.
-#     manualUrl = f"{repoUrl}/blob/main/docs/manual/README.md"
-manualUrl = ""
+# The manual is pushed to GitHub, which renders the markdown and shows the
+# screenshots a local .md opened in an editor does not, so the published copy
+# is preferred, with the local one as the offline fallback. The app checks the
+# address answers before sending anyone to it, off the interface thread.
+manualUrl = f"{repoUrl}/blob/main/docs/manual/README.md"
 # How long to wait for the published copy before falling back to the local one.
 manualTimeoutSeconds = 3.0
 

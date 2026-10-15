@@ -266,9 +266,14 @@ def testTheStubManualShipsWithTheTemplate() -> None:
     assert appConfig.manualPath.read_text(encoding="utf-8").strip()
 
 
-def testNothingIsPublishedUntilTheAuthorSaysSo() -> None:
-    """A new app has no manual online, so the default must not pretend it has."""
-    assert appConfig.manualUrl == ""
+def testThePublishedManualIsTheGitHubCopyOfTheLocalOne() -> None:
+    """The address must point at the file that ships in the checkout."""
+    assert appConfig.manualUrl == (
+        "https://github.com/Charette-AI-Group/wagerBook/blob/main/docs/manual/README.md"
+    )
+    assert appConfig.manualUrl.startswith(appConfig.repoUrl)
+    assert appConfig.manualUrl.endswith("/docs/manual/README.md")
+    assert appConfig.manualPath.name == "README.md"
 
 
 def testTheLocalCopyIsOpenedWhenNothingIsPublished(qtbot, monkeypatch) -> None:
@@ -312,7 +317,7 @@ def testAMissingManualLeavesTheReaderAnAddress(qtbot, monkeypatch, tmp_path) -> 
     mainWindow.openManual(publishedIsReachable=False)
 
     assert shown and "gone.md" in shown[0]
-    assert "nothing published" in shown[0]
+    assert appConfig.manualUrl in shown[0]
 
 
 def testTheCheckRunsOffTheInterfaceThread(qtbot, monkeypatch) -> None:
