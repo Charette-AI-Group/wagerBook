@@ -120,3 +120,8 @@ The book is one JSON file:
 
 Copy it to back it up. If it is ever damaged the app says so at start-up and opens with an
 empty book; move the damaged file aside, or fix it in a text editor, and start again.
+
+`settings.ini` in the same folder remembers the theme from **Help > Theme** and where the window
+was when you last closed it, so it reopens at the same place and size. A window last used on a
+monitor that is no longer attached comes back on a screen you have. Delete `settings.ini` to
+start from the defaults.

@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from wagerBook import appConfig
-from wagerBook.services import themeService
+from wagerBook.services import themeService, windowStateService
 from wagerBook.services.exportCsvService import exportCsv
 from wagerBook.services.importService import ImportFileError, ImportResult, readImportFile
 from wagerBook.services.manualWorker import ManualWorker
@@ -36,7 +36,11 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle(appConfig.windowTitle)
+        # The first-run size; after that, wherever it was when last closed.
         self.resize(appConfig.defaultWindowWidth, appConfig.defaultWindowHeight)
+        savedGeometry = windowStateService.loadGeometry()
+        if savedGeometry is not None:
+            self.restoreGeometry(savedGeometry)
         self.manualWorker: ManualWorker | None = None
 
         self.buildMenuBar()
@@ -230,6 +234,7 @@ class MainWindow(QMainWindow):
         self.manualAction.setEnabled(True)
 
     def closeEvent(self, event: QCloseEvent) -> None:
+        windowStateService.saveGeometry(self.saveGeometry())
         if self.manualWorker is not None:
             # Short, but a thread running into interpreter shutdown turns a
             # clean exit into a crash.

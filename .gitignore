@@ -12,3 +12,6 @@ venv/
 .ruff_cache/
 .mypy_cache/
 *.ui.autosave
+
+# Personal wager files dropped here for File > Import; never committed.
+imports/

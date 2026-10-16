@@ -9,7 +9,7 @@ from PySide6.QtGui import QKeySequence
 
 from wagerBook import appConfig
 from wagerBook.models.wager import Status, Wager
-from wagerBook.services import themeService
+from wagerBook.services import themeService, windowStateService
 from wagerBook.services.importService import ImportResult
 from wagerBook.ui.mainWindow import MainWindow
 
@@ -228,6 +228,38 @@ def testACorruptBookIsReportedNotFatal(qtbot, monkeypatch) -> None:
     assert shown and shown[0][0] == "Wager Book"
     assert str(appConfig.wagersFile) in shown[0][1]
     assert mainWindow.store.wagers == []
+
+
+def testTheWindowSavesItsGeometryOnCloseAndRestoresItNextTime(qtbot, monkeypatch) -> None:
+    """Placing it is Qt's job - restoreGeometry fits it to the screens there are, and
+    the offscreen test screen is smaller than the window - so this checks the hand-off."""
+    first = MainWindow()
+    qtbot.addWidget(first)
+    first.show()
+    first.close()
+    saved = windowStateService.loadGeometry()
+    assert saved is not None and not saved.isEmpty()
+    restored: list = []
+    monkeypatch.setattr(MainWindow, "restoreGeometry",
+                        lambda self, state: restored.append(state) or True)
+
+    second = MainWindow()
+    qtbot.addWidget(second)
+
+    assert restored == [saved]
+
+
+def testTheFirstRunUsesTheDefaultSize(qtbot, monkeypatch) -> None:
+    """No saved geometry yet, so nothing to restore and the configured size stands."""
+    assert windowStateService.loadGeometry() is None
+    restored: list = []
+    monkeypatch.setattr(MainWindow, "restoreGeometry",
+                        lambda self, state: restored.append(state) or True)
+
+    mainWindow = MainWindow()
+    qtbot.addWidget(mainWindow)
+
+    assert restored == []
 
 
 def testAboutOpensTheDialogAndReportsADonation(qtbot, monkeypatch) -> None:

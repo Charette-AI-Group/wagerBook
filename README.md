@@ -19,6 +19,8 @@ actually paid. PySide6, one JSON file, nothing sent anywhere.
   own CSV, previews what it will add, skips rows already in the book, and lists rows it
   could not read with the reason
 - Sorting on real values, **File > Export CSV**, light/dark theme, user manual on F1
+- The window reopens where it was last closed, at the same size; the Active / History tabs are
+  large and the open one is underlined in the accent colour, as in the group's other apps
 
 The user manual is in [`docs/manual/README.md`](docs/manual/README.md), with the arithmetic.
 
@@ -58,7 +60,7 @@ ruff check src tests
 
 `%APPDATA%\Wager Book\wagers.json` — every wager, open or closed. Rewritten whole on each
 change through a temporary file, so a crash mid-write leaves the previous book intact.
-`settings.ini` beside it holds the theme choice.
+`settings.ini` beside it holds the theme choice and the window's last position and size.
 
 ## Structure
 
