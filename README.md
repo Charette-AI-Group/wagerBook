@@ -8,7 +8,7 @@ actually paid. PySide6, one JSON file, nothing sent anywhere.
 
 ## What it does
 
-- **Active** tab: open wagers with platform, category, title, side, stake, odds, contracts,
+- **Active** tab: open wagers with platform, category, title, side, stake, odds,
   max win, profit and return if won, fees, current price and mark value, placed and close dates
 - **History** tab: closed wagers with the result, payout, realised P&L and return
 - **Add / Edit** dialog that works the contracts, max win and profit out as you type

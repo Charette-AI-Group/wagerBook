@@ -41,6 +41,10 @@ Both sites sell contracts that pay **$1** if your side is right and nothing if i
 - **Profit If Won** = Max Win − Stake − Fees
 - **Return** = Profit If Won ÷ Stake
 
+Because each contract pays $1, the number of contracts and the Max Win in dollars are the same
+figure, so the table shows only Max Win. The add/edit form's summary line still states the
+contract count.
+
 A No wager uses the No price. Buying No at 70 cents is a 70 % chance in the market's eyes,
 not 30 %.
 

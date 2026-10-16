@@ -54,7 +54,6 @@ def testActiveRowShowsTheBettingNumbers(qtbot) -> None:
     assert texts["Side"] == "No"
     assert texts["Stake"] == "$25.00"
     assert texts["Odds"] == "40.0%"
-    assert texts["Contracts"] == "62.50"
     assert texts["Max Win"] == "$62.50"
     assert texts["Profit If Won"] == "+$37.00"
     assert texts["Return"] == "+148%"
@@ -81,6 +80,13 @@ def testClosedRowShowsTheOutcome(qtbot) -> None:
     assert texts["P&L"] == "+$59.60"
     assert texts["Return"] == "+298%"
     assert texts["Settled"] == "2026-10-05"
+
+
+def testNoColumnRepeatsMaxWin() -> None:
+    """A contract pays $1, so a Contracts column would be Max Win again."""
+    titles = [column.title for column in activeColumns]
+    assert "Contracts" not in titles
+    assert "Max Win" in titles
 
 
 def testUnknownValuesAreBlankNotZero(qtbot) -> None:

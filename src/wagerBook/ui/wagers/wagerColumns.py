@@ -89,9 +89,6 @@ titleColumn = Column("Title", lambda w: w.title, lambda w: w.title)
 sideColumn = Column("Side", lambda w: str(w.side), lambda w: str(w.side))
 stakeColumn = Column("Stake", lambda w: w.stake, lambda w: money(w.stake), numeric=True)
 oddsColumn = Column("Odds", lambda w: w.price, lambda w: percent(w.price), numeric=True)
-contractsColumn = Column(
-    "Contracts", lambda w: w.contracts, lambda w: count(w.contracts), numeric=True
-)
 maxWinColumn = Column(
     "Max Win", lambda w: w.maxPayout, lambda w: money(w.maxPayout), numeric=True
 )
@@ -133,9 +130,11 @@ settledColumn = Column(
     "Settled", lambda w: sortableDate(w.settledOn), lambda w: dateText(w.settledOn)
 )
 
+# No Contracts column: each contract pays $1, so the count is Max Win in dollars
+# and a second column would only repeat it. The edit form still states it.
 activeColumns: list[Column] = [
     platformColumn, categoryColumn, titleColumn, sideColumn, stakeColumn, oddsColumn,
-    contractsColumn, maxWinColumn, profitIfWonColumn, returnIfWonColumn, feesColumn,
+    maxWinColumn, profitIfWonColumn, returnIfWonColumn, feesColumn,
     nowColumn, valueColumn, placedColumn, closesColumn,
 ]
 
