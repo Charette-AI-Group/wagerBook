@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 
 import pytest
 from PySide6.QtCore import QDate
@@ -107,6 +107,87 @@ def testAcceptRefusesAZeroStake(qtbot) -> None:
 
     assert dialog.result() != dialog.DialogCode.Accepted
     assert "stake" in dialog.problemLabel.text()
+
+
+def testAPastedKalshiAddressBecomesItsTickerAndPlatform(qtbot) -> None:
+    dialog = WagerDialog()
+    qtbot.addWidget(dialog)
+    dialog.platformBox.setCurrentText("Polymarket")
+
+    dialog.tickerEdit.setText(
+        "https://kalshi.com/markets/senatetx/texas-senate-winner/senatetx-26"
+    )
+    dialog.readTickerAddress()
+
+    assert dialog.tickerEdit.text() == "SENATETX-26"
+    assert dialog.platformBox.currentText() == "Kalshi"
+    assert "Kalshi address" in dialog.tickerNote.text()
+
+
+def testAPastedPolymarketAddressIsReadOnOk(qtbot) -> None:
+    """Paste, then OK straight away: the address is still read."""
+    dialog = WagerDialog()
+    qtbot.addWidget(dialog)
+    dialog.titleEdit.setText("Andy Biggs (R)")
+    dialog.stakeSpin.setValue(9.85)
+    dialog.tickerEdit.setText("https://polymarket.com/event/arizona-governor-winner-2026")
+
+    dialog.accept()
+
+    wager = dialog.wager()
+    assert wager.ticker == "arizona-governor-winner-2026"
+    assert wager.platform == Platform.polymarket
+
+
+def testAnAddressFromElsewhereIsLeftAndExplained(qtbot) -> None:
+    dialog = WagerDialog()
+    qtbot.addWidget(dialog)
+    dialog.tickerEdit.setText("https://example.com/some/page")
+
+    dialog.readTickerAddress()
+
+    assert dialog.tickerEdit.text() == "https://example.com/some/page"
+    assert "not a Kalshi or Polymarket market" in dialog.tickerNote.text()
+
+
+def testAPlainTickerIsLeftAlone(qtbot) -> None:
+    dialog = WagerDialog()
+    qtbot.addWidget(dialog)
+    dialog.tickerEdit.setText("SENATETX-26-R")
+
+    dialog.readTickerAddress()
+
+    assert dialog.tickerEdit.text() == "SENATETX-26-R"
+    assert not dialog.tickerNote.isVisibleTo(dialog)
+
+
+def testUntouchedPricesKeepEveryDigitAndTheirTime(qtbot) -> None:
+    """The form shows a tenth of a percent; OK on an untouched form must not round."""
+    fetched = datetime(2026, 10, 16, 9, 42)
+    original = Wager(title="Paxton", stake=9.99, price=0.396271, currentPrice=0.3825,
+                     pricedAt=fetched)
+    dialog = WagerDialog(wager=original)
+    qtbot.addWidget(dialog)
+
+    wager = dialog.wager()
+
+    assert wager.price == 0.396271
+    assert wager.maxPayout == pytest.approx(original.maxPayout)
+    assert wager.currentPrice == 0.3825
+    assert wager.pricedAt == fetched
+
+
+def testATypedCurrentPriceCountsAsEnteredByHand(qtbot) -> None:
+    original = Wager(title="Paxton", stake=10.0, price=0.4, currentPrice=0.38,
+                     pricedAt=datetime(2026, 10, 16, 9, 42))
+    dialog = WagerDialog(wager=original)
+    qtbot.addWidget(dialog)
+
+    dialog.currentSpin.setValue(41.0)
+    wager = dialog.wager()
+
+    assert wager.currentPrice == pytest.approx(0.41)
+    assert wager.pricedAt is None
 
 
 def testAcceptWithAValidFormAccepts(qtbot) -> None:

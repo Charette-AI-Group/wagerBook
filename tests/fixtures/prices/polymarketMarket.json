@@ -1,0 +1,14 @@
+[
+ {
+  "slug": "will-the-republican-win-the-arizona-governor-race-in-2026",
+  "question": "Will the Republicans win the Arizona governor race in 2026?",
+  "groupItemTitle": "Andy Biggs (R)",
+  "closed": false,
+  "active": true,
+  "bestBid": 0.1,
+  "bestAsk": 0.11,
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.105\", \"0.895\"]",
+  "lastTradePrice": 0.11
+ }
+]

@@ -1,0 +1,34 @@
+{
+ "event": {
+  "event_ticker": "SENATETX-26",
+  "title": "Texas Senate winner?",
+  "markets": [
+   {
+    "ticker": "SENATETX-26-R",
+    "event_ticker": "SENATETX-26",
+    "title": "Will Republicans win the Senate race in Texas?",
+    "yes_sub_title": "Ken Paxton",
+    "status": "active",
+    "result": "",
+    "yes_bid_dollars": "0.3800",
+    "yes_ask_dollars": "0.3900",
+    "no_bid_dollars": "0.6100",
+    "no_ask_dollars": "0.6200",
+    "last_price_dollars": "0.3900"
+   },
+   {
+    "ticker": "SENATETX-26-D",
+    "event_ticker": "SENATETX-26",
+    "title": "Will Democratics win the Senate race in Texas?",
+    "yes_sub_title": "James Talarico",
+    "status": "active",
+    "result": "",
+    "yes_bid_dollars": "0.6100",
+    "yes_ask_dollars": "0.6200",
+    "no_bid_dollars": "0.3800",
+    "no_ask_dollars": "0.3900",
+    "last_price_dollars": "0.6200"
+   }
+  ]
+ }
+}

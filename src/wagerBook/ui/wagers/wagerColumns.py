@@ -74,6 +74,17 @@ class Column:
     """Right-aligned in the table."""
     tone: Callable[[Wager], float | None] | None = None
     """A number whose sign colours the cell: gains one way, losses the other."""
+    tip: Callable[[Wager], str | None] | None = None
+    """Shown when the pointer rests on the cell."""
+
+
+def priceTip(wager: Wager) -> str | None:
+    """Where the Now price came from, and how old it is."""
+    if wager.currentPrice is None:
+        return "No price yet. Use Update Prices (F5) once the Ticker is filled in."
+    if wager.pricedAt is None:
+        return "Entered by hand"
+    return f"Sell price as of {wager.pricedAt:%Y-%m-%d %H:%M}"
 
 
 def realizedReturn(wager: Wager) -> float | None:
@@ -85,7 +96,9 @@ def realizedReturn(wager: Wager) -> float | None:
 
 platformColumn = Column("Platform", lambda w: str(w.platform), lambda w: str(w.platform))
 categoryColumn = Column("Category", lambda w: w.category, lambda w: w.category)
-titleColumn = Column("Title", lambda w: w.title, lambda w: w.title)
+titleColumn = Column(
+    "Title", lambda w: w.title, lambda w: w.title, tip=lambda w: w.notes or w.ticker or None
+)
 sideColumn = Column("Side", lambda w: str(w.side), lambda w: str(w.side))
 stakeColumn = Column("Stake", lambda w: w.stake, lambda w: money(w.stake), numeric=True)
 oddsColumn = Column("Odds", lambda w: w.price, lambda w: percent(w.price), numeric=True)
@@ -102,11 +115,11 @@ returnIfWonColumn = Column(
 feesColumn = Column("Fees", lambda w: w.fees, lambda w: money(w.fees), numeric=True)
 nowColumn = Column(
     "Now", lambda w: sortableNumber(w.currentPrice), lambda w: percent(w.currentPrice),
-    numeric=True,
+    numeric=True, tip=priceTip,
 )
 valueColumn = Column(
     "Value", lambda w: sortableNumber(w.markValue), lambda w: money(w.markValue),
-    numeric=True,
+    numeric=True, tip=priceTip,
 )
 placedColumn = Column(
     "Placed", lambda w: sortableDate(w.placedOn), lambda w: dateText(w.placedOn)

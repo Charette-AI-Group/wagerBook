@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date
+from datetime import date, datetime
 
 from PySide6.QtCore import QDate, Qt
 from PySide6.QtWidgets import (
@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
 
 from wagerBook import appConfig
 from wagerBook.models.wager import Platform, Side, Status, Wager
+from wagerBook.services.marketReference import looksLikeAddress, parseMarketReference
 from wagerBook.ui.wagers.wagerColumns import count, money, signedMoney, signedPercent
 
 
@@ -58,6 +59,9 @@ class WagerDialog(QDialog):
     def __init__(self, parent: QWidget | None = None, wager: Wager | None = None) -> None:
         super().__init__(parent)
         self.original = wager
+        # What the price boxes showed on opening; see keptOrTyped.
+        self.shownPrice: float | None = None
+        self.shownCurrent: float | None = None
         self.setWindowTitle("Edit Wager" if wager else "New Wager")
         self.setMinimumWidth(520)
 
@@ -73,7 +77,12 @@ class WagerDialog(QDialog):
         self.titleEdit.setPlaceholderText("The market question, as the site words it")
 
         self.tickerEdit = QLineEdit()
-        self.tickerEdit.setPlaceholderText("Optional: the site's ticker or market id")
+        self.tickerEdit.setPlaceholderText(
+            "Paste the market's web address, or type its ticker - needed for Update Prices"
+        )
+        self.tickerEdit.editingFinished.connect(self.readTickerAddress)
+        self.tickerNote = QLabel()
+        self.tickerNote.setVisible(False)
 
         self.sideBox = QComboBox()
         self.sideBox.addItems([str(side) for side in Side])
@@ -119,6 +128,7 @@ class WagerDialog(QDialog):
         form.addRow("Category", self.categoryBox)
         form.addRow("Title", self.titleEdit)
         form.addRow("Ticker / Market Id", self.tickerEdit)
+        form.addRow("", self.tickerNote)
         form.addRow("Side", self.sideBox)
         form.addRow("Price (Chance Of Winning)", self.priceSpin)
         form.addRow("Stake", self.stakeSpin)
@@ -156,6 +166,7 @@ class WagerDialog(QDialog):
         self.tickerEdit.setText(wager.ticker)
         self.sideBox.setCurrentText(str(wager.side))
         self.priceSpin.setValue(wager.price * 100)
+        self.shownPrice = self.priceSpin.value()
         self.stakeSpin.setValue(wager.stake)
         self.feesSpin.setValue(wager.fees)
         self.placedEdit.setDate(toQDate(wager.placedOn))
@@ -165,27 +176,71 @@ class WagerDialog(QDialog):
         if wager.currentPrice is not None:
             self.currentCheck.setChecked(True)
             self.currentSpin.setValue(wager.currentPrice * 100)
+            self.shownCurrent = self.currentSpin.value()
         self.notesEdit.setPlainText(wager.notes)
+
+    def readTickerAddress(self) -> None:
+        """A pasted web address becomes the ticker it names, and sets the platform."""
+        text = self.tickerEdit.text().strip()
+        if not looksLikeAddress(text):
+            return
+        reference = parseMarketReference(text)
+        if reference is None or reference.platform is None:
+            self.tickerNote.setText(
+                "That address is not a Kalshi or Polymarket market. Paste the address of the"
+                " market's own page."
+            )
+            self.tickerNote.setVisible(True)
+            return
+        self.tickerEdit.setText(reference.identifier)
+        self.platformBox.setCurrentText(str(reference.platform))
+        self.tickerNote.setText(f"Read from the {reference.platform} address.")
+        self.tickerNote.setVisible(True)
+
+    @staticmethod
+    def keptOrTyped(original: float | None, shown: float | None, typedPercent: float) -> float:
+        """The spin box shows a tenth of a percent; an untouched price keeps every digit.
+
+        `shown` is what the box displayed when the form opened - read back from it,
+        since its rounding of a half (38.25) need not match Python's. Without this,
+        opening an imported wager and pressing OK would round 0.396271 to 0.396
+        and move its Max Win.
+        """
+        if original is not None and shown is not None and abs(typedPercent - shown) < 1e-9:
+            return original
+        return typedPercent / 100
+
+    def currentPriceAndTime(self) -> tuple[float | None, datetime | None]:
+        """A fetched price left alone keeps its time; one typed in counts as entered by hand."""
+        if not self.currentCheck.isChecked():
+            return None, None
+        base = self.original
+        before = base.currentPrice if base else None
+        price = self.keptOrTyped(before, self.shownCurrent, self.currentSpin.value())
+        unchanged = before is not None and price == before
+        return price, (base.pricedAt if unchanged and base else None)
 
     def wager(self) -> Wager:
         """The wager as the form describes it; settlement fields are kept as they were."""
         base = self.original
+        currentPrice, pricedAt = self.currentPriceAndTime()
         return Wager(
             id=base.id if base else uuid.uuid4().hex,
             title=self.titleEdit.text().strip(),
             platform=Platform(self.platformBox.currentText()),
             side=Side(self.sideBox.currentText()),
             stake=self.stakeSpin.value(),
-            price=self.priceSpin.value() / 100,
+            price=self.keptOrTyped(
+                base.price if base else None, self.shownPrice, self.priceSpin.value()
+            ),
             fees=self.feesSpin.value(),
             placedOn=fromQDate(self.placedEdit.date()),
             closesOn=fromQDate(self.closesEdit.date()) if self.closesCheck.isChecked() else None,
             category=self.categoryBox.currentText().strip(),
             ticker=self.tickerEdit.text().strip(),
             notes=self.notesEdit.toPlainText().strip(),
-            currentPrice=(
-                self.currentSpin.value() / 100 if self.currentCheck.isChecked() else None
-            ),
+            currentPrice=currentPrice,
+            pricedAt=pricedAt,
             status=base.status if base else Status.active,
             payout=base.payout if base else None,
             settledOn=base.settledOn if base else None,
@@ -210,6 +265,8 @@ class WagerDialog(QDialog):
         self.summaryLabel.setText("  ·  ".join(parts))
 
     def accept(self) -> None:
+        # Pasting and pressing Enter can reach here before the box loses focus.
+        self.readTickerAddress()
         problem = self.problem()
         if problem:
             self.problemLabel.setText(problem)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 
 import pytest
 
@@ -83,6 +83,7 @@ def testDictRoundTripKeepsEverything() -> None:
         ticker="chiefs-sb-2027",
         notes="Bought on the dip",
         currentPrice=0.22,
+        pricedAt=datetime(2026, 10, 16, 9, 42, 5),
         status=Status.active,
     )
 

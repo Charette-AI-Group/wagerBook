@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 
 from wagerBook.models.wager import Status, Wager
 
@@ -15,6 +16,16 @@ class ActiveSummary:
     maxPayout: float = 0.0
     """What comes back if every open wager wins."""
     maxProfit: float = 0.0
+    priced: int = 0
+    """Open wagers with a current price; the next three cover only these."""
+    value: float = 0.0
+    """What the priced wagers could be sold for now."""
+    unrealized: float = 0.0
+    """That value less what the priced wagers cost, fees included."""
+    fetched: int = 0
+    """Of the priced, how many came from Update Prices - the rest were typed in."""
+    oldestPrice: datetime | None = None
+    """The stalest fetched price: the totals are no fresher than this."""
 
 
 @dataclass(frozen=True)
@@ -42,12 +53,19 @@ class ClosedSummary:
 
 def summarizeActive(wagers: list[Wager]) -> ActiveSummary:
     openOnes = [wager for wager in wagers if wager.isActive]
+    priced = [wager for wager in openOnes if wager.markValue is not None]
+    moments = [wager.pricedAt for wager in priced if wager.pricedAt is not None]
     return ActiveSummary(
         count=len(openOnes),
         staked=sum(wager.stake for wager in openOnes),
         fees=sum(wager.fees for wager in openOnes),
         maxPayout=sum(wager.maxPayout for wager in openOnes),
         maxProfit=sum(wager.maxProfit for wager in openOnes),
+        priced=len(priced),
+        value=sum(wager.markValue or 0.0 for wager in priced),
+        unrealized=sum((wager.markValue or 0.0) - wager.stake - wager.fees for wager in priced),
+        fetched=len(moments),
+        oldestPrice=min(moments) if moments else None,
     )
 
 

@@ -68,6 +68,6 @@ class WagerTableModel(QAbstractTableModel):
                 return gainColour
             if tone is not None and tone < 0:
                 return lossColour
-        if role == Qt.ItemDataRole.ToolTipRole and column.title == "Title":
-            return wager.notes or wager.ticker or None
+        if role == Qt.ItemDataRole.ToolTipRole and column.tip is not None:
+            return column.tip(wager)
         return None

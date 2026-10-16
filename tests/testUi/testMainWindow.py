@@ -41,7 +41,10 @@ def testMenuBarStructure(qtbot) -> None:
     assert menuTitles == ["&File", "&Help"]
 
     fileItems = [a.text() for a in mainWindow.fileMenu.actions() if not a.isSeparator()]
-    assert fileItems == ["&New Wager...", "&Import CSV...", "&Export CSV...", "E&xit"]
+    assert fileItems == [
+        "&New Wager...", "&Update Prices", "&Import CSV...", "&Export CSV...", "E&xit"
+    ]
+    assert mainWindow.updatePricesAction.shortcut() == QKeySequence("F5")
     assert any(a.isSeparator() for a in mainWindow.fileMenu.actions())
 
     helpItems = [a.text() for a in mainWindow.helpMenu.actions() if not a.isSeparator()]

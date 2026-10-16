@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime
 from enum import StrEnum
 
 
@@ -57,7 +57,10 @@ class Wager:
     """The market's own id or ticker, to find it again on the site."""
     notes: str = ""
     currentPrice: float | None = None
-    """Latest price seen for the side held, to value an open position."""
+    """Latest price seen for the side held, to value an open position.
+    From Update Prices it is the price the position could be sold at."""
+    pricedAt: datetime | None = None
+    """When currentPrice was set, so a stale price can be told from a fresh one."""
     status: Status = Status.active
     payout: float | None = None
     """Dollars received when the wager closed."""
@@ -133,6 +136,7 @@ class Wager:
             "ticker": self.ticker,
             "notes": self.notes,
             "currentPrice": self.currentPrice,
+            "pricedAt": self.pricedAt.isoformat(timespec="seconds") if self.pricedAt else None,
             "status": str(self.status),
             "payout": self.payout,
             "settledOn": self.settledOn.isoformat() if self.settledOn else None,
@@ -145,6 +149,9 @@ class Wager:
 
         def optionalFloat(value: object) -> float | None:
             return None if value is None else float(value)  # type: ignore[arg-type]
+
+        def optionalMoment(value: object) -> datetime | None:
+            return datetime.fromisoformat(str(value)) if value else None
 
         return cls(
             id=str(data.get("id") or uuid.uuid4().hex),
@@ -160,6 +167,7 @@ class Wager:
             ticker=str(data.get("ticker", "")),
             notes=str(data.get("notes", "")),
             currentPrice=optionalFloat(data.get("currentPrice")),
+            pricedAt=optionalMoment(data.get("pricedAt")),
             status=Status(str(data.get("status", Status.active))),
             payout=optionalFloat(data.get("payout")),
             settledOn=optionalDate(data.get("settledOn")),

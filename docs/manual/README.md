@@ -19,14 +19,14 @@ Click **Add...** on the Active tab, or press **Ctrl+N**. The fields:
 | Platform | Kalshi or Polymarket |
 | Category | Politics, Sports, Economics and so on; type your own if none fits |
 | Title | The market question, as the site words it |
-| Ticker / Market Id | Optional. The site's ticker, so you can find the market again |
+| Ticker / Market Id | Paste the market's web address here, or type its ticker. Needed for Update Prices |
 | Side | Yes or No — the side you bought |
 | Price (Chance Of Winning) | What you paid per contract, in cents. 40 % means 40 cents, and is the market's own estimate that your side wins |
 | Stake | The dollars you put in, before fees |
 | Fees | What the site charged, if anything |
 | Placed On | The day you bought |
 | Closes On | When the market is expected to resolve, if you know it |
-| Current Price | Optional. The latest price of your side, to see what the position is worth now |
+| Current Price | Optional. Update Prices fills this in; type a price here only for a market it cannot reach |
 | Notes | Why you took it, what to watch for |
 
 The line above the buttons works it out as you type: how many contracts the stake buys, the
@@ -47,6 +47,50 @@ contract count.
 
 A No wager uses the No price. Buying No at 70 cents is a 70 % chance in the market's eyes,
 not 30 %.
+
+## Updating prices
+
+**Now** and **Value** show what each open wager could be sold for today. Click **Update
+Prices** above the Active table, or press **F5**, and the app asks Kalshi and Polymarket for
+the current price of every open wager. It takes a second or two, and the window stays usable
+while it runs. Both sites publish prices publicly, so no login or API key is involved and
+nothing about your account is sent.
+
+The price used is the one you could **sell at right now**: the best bid for the side you hold.
+That is what Kalshi's Cash Out shows, and it never flatters a position the way the last trade
+or the asking price can. The line under the table then adds what the priced wagers are worth
+now and the gain or loss against what they cost, with the time of the oldest price. Rest the
+pointer on a Now or Value cell to see when that price was fetched, or whether it was typed in.
+
+### Linking a wager to its market
+
+A wager can only be priced once the app knows which market it is. Open the wager (double-click
+it), click in **Ticker / Market Id**, and paste the address of the market's page from your
+browser:
+
+```
+https://kalshi.com/markets/senatetx/texas-senate-winner/senatetx-26
+https://polymarket.com/event/arizona-governor-winner-2026
+```
+
+The app reads the address as you leave the box, fills in the market's id, and sets the
+platform. Typing a Kalshi ticker or a Polymarket slug directly works too.
+
+Many addresses name a whole race, not one candidate. The app then picks the candidate whose
+name appears in the wager's title - "Texas Senate winner? - Ken Paxton" finds Ken Paxton - and
+stores that market's own id, so the next update goes straight to it. If no name or more than
+one name in the race matches the title, the wager is not priced and the app lists the choices;
+add the candidate's name to the title, or paste the candidate's own market address.
+
+### When a wager is not priced
+
+- **No ticker yet**: the status bar counts these. Link them as above.
+- **Cannot be matched, closed, or nobody is bidding**: a box lists each wager and the reason.
+  A closed market means the wager should be settled.
+- **No connection**: nothing is changed, and the box says which site did not answer.
+
+A wager that cannot be priced keeps its previous price. A Current Price typed into the form
+is kept too, and is shown as entered by hand until the next update replaces it.
 
 ## Settling a wager
 

@@ -12,6 +12,9 @@ actually paid. PySide6, one JSON file, nothing sent anywhere.
   max win, profit and return if won, fees, current price and mark value, placed and close dates
 - **History** tab: closed wagers with the result, payout, realised P&L and return
 - **Add / Edit** dialog that works the contracts, max win and profit out as you type
+- **Update Prices** (F5) fetches what each open wager could be sold for now - the best bid for
+  the side held - from Kalshi's and Polymarket's public market data, off the interface thread;
+  paste a market's web address into Ticker and the app reads the id and the platform from it
 - **Settle** dialog that fills in the usual payout for Won, Lost, Sold or Voided and lets you
   correct it; **Reopen** for a settlement made by mistake
 - Totals under each table: open exposure and max win; closed count, win rate and net P&L
@@ -84,6 +87,9 @@ python tools/makeIcons.py
 | Services | `src/wagerBook/services/wagerStore.py` | The JSON book: load, save, add, update, settle, reopen, remove |
 | | `src/wagerBook/services/wagerSummary.py` | Totals for the line under each table |
 | | `src/wagerBook/services/exportCsvService.py` | CSV export |
+| | `src/wagerBook/services/priceService.py` | Update Prices: both sites' public APIs, the market picked from an event by the title, sell price per side; endpoints in its docstring |
+| | `src/wagerBook/services/priceWorker.py` | Runs a price update off the interface thread |
+| | `src/wagerBook/services/marketReference.py` | Reads a pasted Kalshi or Polymarket address into a ticker |
 | | `src/wagerBook/services/importService.py` | CSV import: header aliases, lenient values, duplicate rule; the column mapping is in its docstring |
 | UI | `src/wagerBook/ui/wagers/` | Column definitions, table model, table view, the Active/History book view |
 | | `src/wagerBook/ui/dialogs/wagerDialog.py` | Add / edit |

@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 from wagerBook.models.wager import Status, Wager
@@ -101,6 +101,26 @@ class WagerStore:
         else:
             raise KeyError(wager.id)
         self.save()
+
+    def applyPrices(self, quotes: list[tuple[str, float, str]], pricedAt: datetime) -> int:
+        """Set each wager's price and ticker from (wagerId, price, ticker); one write.
+
+        A wager gone or closed since the update started is left alone.
+        Returns how many were changed.
+        """
+        changed = 0
+        byId = {wager.id: wager for wager in self.wagers}
+        for wagerId, price, ticker in quotes:
+            wager = byId.get(wagerId)
+            if wager is None or not wager.isActive:
+                continue
+            wager.currentPrice = price
+            wager.ticker = ticker
+            wager.pricedAt = pricedAt
+            changed += 1
+        if changed:
+            self.save()
+        return changed
 
     def remove(self, wagerId: str) -> None:
         wager = self.find(wagerId)

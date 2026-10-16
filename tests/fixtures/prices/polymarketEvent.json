@@ -1,0 +1,164 @@
+[
+ {
+  "slug": "arizona-governor-winner-2026",
+  "title": "Arizona Governor Election Winner",
+  "markets": [
+   {
+    "slug": "will-the-democrat-win-the-arizona-governor-race-in-2026",
+    "question": "Will the Democrats win the Arizona governor race in 2026?",
+    "groupItemTitle": "Katie Hobbs (D)",
+    "closed": false,
+    "active": true,
+    "bestBid": 0.88,
+    "bestAsk": 0.89,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": "[\"0.885\", \"0.115\"]",
+    "lastTradePrice": 0.89
+   },
+   {
+    "slug": "will-the-republican-win-the-arizona-governor-race-in-2026",
+    "question": "Will the Republicans win the Arizona governor race in 2026?",
+    "groupItemTitle": "Andy Biggs (R)",
+    "closed": false,
+    "active": true,
+    "bestBid": 0.1,
+    "bestAsk": 0.11,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": "[\"0.105\", \"0.895\"]",
+    "lastTradePrice": 0.11
+   },
+   {
+    "slug": "will-option-a-win-the-arizona-governor-race-in-2026",
+    "question": "Will Option A win the Arizona governor race in 2026?",
+    "groupItemTitle": "Option A",
+    "closed": false,
+    "active": false,
+    "bestBid": 0,
+    "bestAsk": 1,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": null,
+    "lastTradePrice": 0
+   },
+   {
+    "slug": "will-option-b-win-the-arizona-governor-race-in-2026",
+    "question": "Will Option B win the Arizona governor race in 2026?",
+    "groupItemTitle": "Option B",
+    "closed": false,
+    "active": false,
+    "bestBid": 0,
+    "bestAsk": 1,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": null,
+    "lastTradePrice": 0
+   },
+   {
+    "slug": "will-option-c-win-the-arizona-governor-race-in-2026",
+    "question": "Will Option C win the Arizona governor race in 2026?",
+    "groupItemTitle": "Option C",
+    "closed": false,
+    "active": false,
+    "bestBid": 0,
+    "bestAsk": 1,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": null,
+    "lastTradePrice": 0
+   },
+   {
+    "slug": "will-option-d-win-the-arizona-governor-race-in-2026",
+    "question": "Will Option D win the Arizona governor race in 2026?",
+    "groupItemTitle": "Option D",
+    "closed": false,
+    "active": false,
+    "bestBid": 0,
+    "bestAsk": 1,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": null,
+    "lastTradePrice": 0
+   },
+   {
+    "slug": "will-option-e-win-the-arizona-governor-race-in-2026",
+    "question": "Will Option E win the Arizona governor race in 2026?",
+    "groupItemTitle": "Option E",
+    "closed": false,
+    "active": false,
+    "bestBid": 0,
+    "bestAsk": 1,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": null,
+    "lastTradePrice": 0
+   },
+   {
+    "slug": "will-option-f-win-the-arizona-governor-race-in-2026",
+    "question": "Will Option F win the Arizona governor race in 2026?",
+    "groupItemTitle": "Option F",
+    "closed": false,
+    "active": false,
+    "bestBid": 0,
+    "bestAsk": 1,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": null,
+    "lastTradePrice": 0
+   },
+   {
+    "slug": "will-option-g-win-the-arizona-governor-race-in-2026",
+    "question": "Will Option G win the Arizona governor race in 2026?",
+    "groupItemTitle": "Option G",
+    "closed": false,
+    "active": false,
+    "bestBid": 0,
+    "bestAsk": 1,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": null,
+    "lastTradePrice": 0
+   },
+   {
+    "slug": "will-option-h-win-the-arizona-governor-race-in-2026",
+    "question": "Will Option H win the Arizona governor race in 2026?",
+    "groupItemTitle": "Option H",
+    "closed": false,
+    "active": false,
+    "bestBid": 0,
+    "bestAsk": 1,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": null,
+    "lastTradePrice": 0
+   },
+   {
+    "slug": "will-option-i-win-the-arizona-governor-race-in-2026",
+    "question": "Will Option I win the Arizona governor race in 2026?",
+    "groupItemTitle": "Option I",
+    "closed": false,
+    "active": false,
+    "bestBid": 0,
+    "bestAsk": 1,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": null,
+    "lastTradePrice": 0
+   },
+   {
+    "slug": "will-option-j-win-the-arizona-governor-race-in-2026",
+    "question": "Will Option J win the Arizona governor race in 2026?",
+    "groupItemTitle": "Option J",
+    "closed": false,
+    "active": false,
+    "bestBid": 0,
+    "bestAsk": 1,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": null,
+    "lastTradePrice": 0
+   },
+   {
+    "slug": "will-other-win-the-arizona-governor-race-in-2026",
+    "question": "Will Other win the Arizona governor race in 2026?",
+    "groupItemTitle": "Other",
+    "closed": false,
+    "active": false,
+    "bestBid": 0,
+    "bestAsk": 1,
+    "outcomes": "[\"Yes\", \"No\"]",
+    "outcomePrices": null,
+    "lastTradePrice": 0
+   }
+  ]
+ }
+]

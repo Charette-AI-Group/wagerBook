@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 
 from PySide6.QtCore import Qt
 
 from wagerBook.models.wager import Status, Wager
+from wagerBook.services.priceService import PriceQuote, PriceRequest, PriceUpdate, SkippedPrice
+from wagerBook.services.priceWorker import PriceWorker
 from wagerBook.services.wagerStore import WagerStore
-from wagerBook.ui.wagers.wagerBookView import WagerBookView
+from wagerBook.services.wagerSummary import summarizeActive
+from wagerBook.ui.wagers.wagerBookView import WagerBookView, activeSummaryText
+from wagerBook.ui.wagers.wagerColumns import priceTip
 
 
 def makeView(qtbot, tmp_path, wagers: list[Wager] | None = None) -> WagerBookView:
@@ -217,3 +221,152 @@ def testASaveFailureIsReportedAndTheRowsStayHonest(qtbot, tmp_path, monkeypatch)
     assert errors and errors[0][0] == "Wager Book"
     assert "Could not save" in errors[0][1]
     assert rowTitles(view.activeTable) == ["Unsaved"]
+
+
+# ------------------------------------------------------- update prices ----
+
+
+class CannedPrices:
+    """Stands in for PriceService: answers at once, no network."""
+
+    def __init__(self, makeUpdate) -> None:
+        self.makeUpdate = makeUpdate
+        self.asked: list[PriceRequest] = []
+
+    def updateAll(self, requests):
+        self.asked = list(requests)
+        return self.makeUpdate(requests)
+
+
+def runPriceUpdate(qtbot, view: WagerBookView, monkeypatch, makeUpdate) -> CannedPrices:
+    canned = CannedPrices(makeUpdate)
+    monkeypatch.setattr(
+        WagerBookView, "makePriceWorker",
+        lambda self, requests: PriceWorker(requests, priceService=canned, parent=self),
+    )
+    with qtbot.waitSignal(view.priceUpdateRunning, timeout=5000,
+                          check_params_cb=lambda running: running is False):
+        view.startPriceUpdate()
+        assert not view.updatePricesButton.isEnabled()  # one run at a time
+    return canned
+
+
+pricedMoment = datetime(2026, 10, 16, 9, 42)
+
+
+def testUpdatePricesSetsNowAndValueAndSaysHowMany(qtbot, tmp_path, monkeypatch) -> None:
+    linked = Wager(title="Ken Paxton", stake=9.99, price=0.396271, ticker="SENATETX-26")
+    unlinked = Wager(title="No ticker yet", stake=5.0, price=0.5)
+    done = Wager(title="Done", stake=1.0, price=0.5, status=Status.won, payout=2.0)
+    view = makeView(qtbot, tmp_path, [linked, unlinked, done])
+    messages: list[str] = []
+    errors: list[tuple[str, str]] = []
+    view.statusMessage.connect(messages.append)
+    view.errorMessage.connect(lambda title, message: errors.append((title, message)))
+
+    def answer(requests):
+        byId = {request.wagerId: request for request in requests}
+        return PriceUpdate(
+            at=pricedMoment,
+            quotes=[PriceQuote(linked.id, 0.38, "SENATETX-26-R")],
+            skipped=[SkippedPrice(byId[unlinked.id], "no ticker: paste the address")],
+        )
+
+    canned = runPriceUpdate(qtbot, view, monkeypatch, answer)
+
+    assert {request.wagerId for request in canned.asked} == {linked.id, unlinked.id}
+    priced = view.store.find(linked.id)
+    assert priced.currentPrice == 0.38
+    assert priced.ticker == "SENATETX-26-R"
+    assert priced.pricedAt == pricedMoment
+    assert view.updatePricesButton.isEnabled()
+    assert messages[-1].startswith("Prices updated for 1 of 2 open wagers at 09:42.")
+    assert "1 have no ticker yet" in messages[-1]
+    assert errors == []  # a missing ticker is a hint, not a failure
+    assert "Worth now $9.58 (1 priced), -$0.41" in view.activeSummary.text()
+
+
+def testWagersThatCouldNotBePricedAreListedWithTheReason(qtbot, tmp_path, monkeypatch) -> None:
+    wager = Wager(title="Texas Senate winner?", stake=10.0, price=0.4, ticker="SENATETX-26")
+    view = makeView(qtbot, tmp_path, [wager])
+    errors: list[tuple[str, str]] = []
+    view.errorMessage.connect(lambda title, message: errors.append((title, message)))
+
+    def answer(requests):
+        reason = "several markets and none of their names is in the title: Ken Paxton"
+        return PriceUpdate(at=pricedMoment, skipped=[SkippedPrice(requests[0], reason)])
+
+    runPriceUpdate(qtbot, view, monkeypatch, answer)
+
+    assert errors and errors[0][0] == "Update Prices"
+    assert "Texas Senate winner?: several markets" in errors[0][1]
+    assert view.store.find(wager.id).currentPrice is None
+
+
+def testNoConnectionChangesNothingAndSaysSo(qtbot, tmp_path, monkeypatch) -> None:
+    wager = Wager(title="Paxton", stake=10.0, price=0.4, ticker="SENATETX-26-R",
+                  currentPrice=0.41, pricedAt=datetime(2026, 10, 15, 8, 0))
+    view = makeView(qtbot, tmp_path, [wager])
+    errors: list[tuple[str, str]] = []
+    view.errorMessage.connect(lambda title, message: errors.append((title, message)))
+
+    def answer(requests):
+        return PriceUpdate(at=pricedMoment, skipped=[SkippedPrice(
+            requests[0], "could not reach api.elections.kalshi.com: timed out", unreachable=True)])
+
+    runPriceUpdate(qtbot, view, monkeypatch, answer)
+
+    assert errors and "Neither price site answered" in errors[0][1]
+    assert "timed out" in errors[0][1]
+    kept = view.store.find(wager.id)
+    assert kept.currentPrice == 0.41 and kept.pricedAt == datetime(2026, 10, 15, 8, 0)
+
+
+def testNoOpenWagersNeedsNoUpdate(qtbot, tmp_path) -> None:
+    view = makeView(qtbot, tmp_path)
+    messages: list[str] = []
+    view.statusMessage.connect(messages.append)
+
+    view.startPriceUpdate()
+
+    assert messages == ["No open wagers to price."]
+    assert view.priceWorker is None
+
+
+def testTheTotalsSayHowOldThePricesAre() -> None:
+    wagers = [
+        Wager(title="A", stake=10.0, price=0.5, currentPrice=0.6,
+              pricedAt=datetime(2026, 10, 15, 8, 5)),
+        Wager(title="B", stake=10.0, price=0.5, currentPrice=0.4,
+              pricedAt=datetime(2026, 10, 16, 9, 42)),
+    ]
+
+    text = activeSummaryText(summarizeActive(wagers), now=datetime(2026, 10, 16, 12, 0))
+
+    # 12 + 8 = 20 worth now against 20 staked; the oldest price sets the age.
+    assert "Worth now $20.00, $0.00, prices from Oct 15 08:05" in text
+    assert "priced)" not in text  # every open wager has a price
+
+
+def testTypedPricesAreNotPassedOffAsFetched() -> None:
+    """One fresh fetch must not make fourteen typed-in prices look current."""
+    now = datetime(2026, 10, 16, 12, 0)
+    fetched = Wager(title="A", stake=10.0, price=0.5, currentPrice=0.6,
+                    pricedAt=datetime(2026, 10, 16, 9, 42))
+    typed = Wager(title="B", stake=10.0, price=0.5, currentPrice=0.4)
+
+    mixed = activeSummaryText(summarizeActive([fetched, typed]), now=now)
+    byHand = activeSummaryText(summarizeActive([typed]), now=now)
+
+    assert "1 of 2 prices fetched (oldest 09:42), the rest typed in" in mixed
+    assert byHand.endswith(", prices entered by hand")
+
+
+def testThePriceCellsSayWhereThePriceCameFrom() -> None:
+    fetched = Wager(title="A", currentPrice=0.4, pricedAt=datetime(2026, 10, 16, 9, 42))
+    typed = Wager(title="B", currentPrice=0.4)
+    none = Wager(title="C")
+
+    assert priceTip(fetched) == "Sell price as of 2026-10-16 09:42"
+    assert priceTip(typed) == "Entered by hand"
+    assert "Update Prices" in priceTip(none)

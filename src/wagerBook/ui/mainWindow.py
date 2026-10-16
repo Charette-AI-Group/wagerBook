@@ -49,6 +49,9 @@ class MainWindow(QMainWindow):
         self.store = WagerStore(appConfig.wagersFile)
         self.bookView = WagerBookView(self.store)
         self.connectView(self.bookView)
+        self.bookView.priceUpdateRunning.connect(
+            lambda running: self.updatePricesAction.setEnabled(not running)
+        )
         self.setCentralWidget(self.bookView)
         self.bookView.loadBook()
 
@@ -61,6 +64,13 @@ class MainWindow(QMainWindow):
         self.newWagerAction.setShortcut(QKeySequence.StandardKey.New)
         self.newWagerAction.triggered.connect(self.onFileNewWager)
         fileMenu.addAction(self.newWagerAction)
+
+        self.updatePricesAction = QAction("&Update Prices", self)
+        self.updatePricesAction.setShortcut(QKeySequence("F5"))
+        self.updatePricesAction.triggered.connect(self.onUpdatePrices)
+        fileMenu.addAction(self.updatePricesAction)
+
+        fileMenu.addSeparator()
 
         self.importCsvAction = QAction("&Import CSV...", self)
         self.importCsvAction.triggered.connect(self.onFileImportCsv)
@@ -130,6 +140,9 @@ class MainWindow(QMainWindow):
 
     def onFileNewWager(self) -> None:
         self.bookView.onAdd()
+
+    def onUpdatePrices(self) -> None:
+        self.bookView.startPriceUpdate()
 
     def chooseImportPath(self) -> str:
         """A method so tests can answer without a file dialog opening."""
@@ -235,6 +248,8 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent) -> None:
         windowStateService.saveGeometry(self.saveGeometry())
+        # Each request is allowed several seconds; a whole run is bounded well inside this.
+        self.bookView.waitForPriceUpdate(15000)
         if self.manualWorker is not None:
             # Short, but a thread running into interpreter shutdown turns a
             # clean exit into a crash.

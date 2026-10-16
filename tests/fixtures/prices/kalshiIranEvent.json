@@ -1,0 +1,21 @@
+{
+ "event": {
+  "event_ticker": "KXIRANDEMOCRACY-27MAR01",
+  "title": "Will Iran become a democracy in 2026?",
+  "markets": [
+   {
+    "ticker": "KXIRANDEMOCRACY-27MAR01-T6",
+    "event_ticker": "KXIRANDEMOCRACY-27MAR01",
+    "title": "Will Iran's score in the Economist Intelligence Unit's Democracy Index be at least 6 in the 2026 edition?",
+    "yes_sub_title": "Yes",
+    "status": "active",
+    "result": "",
+    "yes_bid_dollars": "0.0120",
+    "yes_ask_dollars": "0.0280",
+    "no_bid_dollars": "0.9720",
+    "no_ask_dollars": "0.9880",
+    "last_price_dollars": "0.0130"
+   }
+  ]
+ }
+}
