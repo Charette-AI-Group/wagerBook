@@ -62,6 +62,18 @@ ruff check src tests
 change through a temporary file, so a crash mid-write leaves the previous book intact.
 `settings.ini` beside it holds the theme choice and the window's last position and size.
 
+## App icon
+
+The icon - a book cover with the odds on it: a ring split green and coral around a check
+mark - is drawn in code, like 26theOneAssets': `tools/makeIcons.py` paints it separately at
+each size from 16 to 256 px and packs them into `src/wagerBook/resources/wagerBook.ico`.
+Startup sets it on every window and gives the app its own Windows taskbar ID, so a window
+started by `pythonw.exe` is not filed under Python. To redraw it after changing the design:
+
+```powershell
+python tools/makeIcons.py
+```
+
 ## Structure
 
 | Layer | Folder | Purpose |

@@ -26,6 +26,11 @@ donatePressedColour = "#d9991f"
 
 projectRoot = Path(__file__).resolve().parents[2]
 resourcesDir = Path(__file__).resolve().parent / "resources"
+# Drawn by tools/makeIcons.py. The app runs without one if it is missing.
+iconFile = resourcesDir / "wagerBook.ico"
+# Windows groups taskbar buttons by this ID. Without one, a window started by
+# pythonw.exe is filed under Python and shows Python's icon, not this app's.
+appUserModelId = f"{organizationName}.WagerBook"
 
 # Help > User Manual. The copy in the checkout is what a new app has, and it is
 # enough: the menu item works from the first run rather than being a promise.
