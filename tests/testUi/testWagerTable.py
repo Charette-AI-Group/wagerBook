@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from datetime import date
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QPoint, Qt
+from PySide6.QtWidgets import QDialog, QLineEdit, QPushButton, QVBoxLayout, QWidget
 
 from wagerBook.models.wager import Side, Status, Wager
 from wagerBook.ui.wagers.wagerColumns import (
@@ -157,6 +158,107 @@ def testSelectingAnUnknownIdSelectsNothing(qtbot) -> None:
 
     assert not table.selectWager("nobody")
     assert table.selectedWager() is None
+
+
+def tableInAWindow(qtbot) -> tuple[QWidget, WagerTable, QPushButton, QPushButton, QLineEdit]:
+    """A table with two rows, a button that uses the selection, one that does not,
+    and a text box - the shape of the Active tab."""
+    window = QWidget()
+    layout = QVBoxLayout(window)
+    table = WagerTable(activeColumns)
+    keeper = QPushButton("Edit...")
+    other = QPushButton("Add...")
+    textBox = QLineEdit()
+    for widget in (keeper, other, textBox, table):
+        layout.addWidget(widget)
+    table.keepSelectionFor([keeper])
+    table.setWagers([
+        Wager(title="First", stake=1.0, price=0.5),
+        Wager(title="Second", stake=2.0, price=0.5),
+    ])
+    qtbot.addWidget(window)
+    window.resize(900, 500)
+    window.show()
+    qtbot.waitExposed(window)
+    return window, table, keeper, other, textBox
+
+
+def rowCentre(table: WagerTable, row: int) -> QPoint:
+    return table.visualRect(table.proxy.index(row, 2)).center()
+
+
+def testClickingARowSelectsIt(qtbot) -> None:
+    _window, table, _keeper, _other, _textBox = tableInAWindow(qtbot)
+
+    qtbot.mouseClick(table.viewport(), Qt.MouseButton.LeftButton, pos=rowCentre(table, 1))
+
+    assert table.selectedWager() is not None
+    assert table.selectedWager().title == "Second"
+
+
+def testClickingAnotherControlClearsTheHighlight(qtbot) -> None:
+    _window, table, _keeper, other, textBox = tableInAWindow(qtbot)
+    for target in (other, textBox):
+        table.selectRow(0)
+        assert table.selectedWager() is not None
+
+        qtbot.mouseClick(target, Qt.MouseButton.LeftButton)
+
+        assert table.selectedWager() is None
+        assert not table.currentIndex().isValid()  # no focus box left on a cell either
+
+
+def testAButtonThatUsesTheSelectionKeepsIt(qtbot) -> None:
+    """Pressing Edit must not clear the row Edit is about to open."""
+    _window, table, keeper, _other, _textBox = tableInAWindow(qtbot)
+    seen: list[str | None] = []
+    keeper.clicked.connect(
+        lambda: seen.append(table.selectedWager().title if table.selectedWager() else None)
+    )
+    table.selectRow(1)
+
+    qtbot.mouseClick(keeper, Qt.MouseButton.LeftButton)
+
+    assert seen == ["Second"]
+    assert table.selectedWager() is not None
+
+
+def testTheBlankSpaceBelowTheRowsClearsTheHighlight(qtbot) -> None:
+    _window, table, _keeper, _other, _textBox = tableInAWindow(qtbot)
+    table.selectRow(0)
+    blank = QPoint(20, table.viewport().height() - 10)
+    assert not table.indexAt(blank).isValid()
+
+    qtbot.mouseClick(table.viewport(), Qt.MouseButton.LeftButton, pos=blank)
+
+    assert table.selectedWager() is None
+
+
+def testSortingByAHeaderKeepsTheRow(qtbot) -> None:
+    _window, table, _keeper, _other, _textBox = tableInAWindow(qtbot)
+    table.selectRow(0)
+    header = table.horizontalHeader()
+    stakeColumn = [c.title for c in activeColumns].index("Stake")
+    centre = QPoint(header.sectionViewportPosition(stakeColumn) + 10, header.height() // 2)
+
+    qtbot.mouseClick(header.viewport(), Qt.MouseButton.LeftButton, pos=centre)
+
+    assert table.selectedWager() is not None
+    assert table.selectedWager().title == "First"
+
+
+def testAClickInAnotherWindowLeavesTheSelectionAlone(qtbot) -> None:
+    """The edit form a row opens is not a click away from that row."""
+    _window, table, _keeper, _other, _textBox = tableInAWindow(qtbot)
+    dialog = QDialog()
+    dialogButton = QPushButton("OK", dialog)
+    qtbot.addWidget(dialog)
+    dialog.show()
+    table.selectRow(1)
+
+    qtbot.mouseClick(dialogButton, Qt.MouseButton.LeftButton)
+
+    assert table.selectedWager() is not None
 
 
 def testDoubleClickActivatesTheWager(qtbot) -> None:

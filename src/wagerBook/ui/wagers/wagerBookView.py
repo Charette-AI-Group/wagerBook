@@ -102,6 +102,13 @@ class WagerBookView(ReportingView):
         self.historyEditButton.clicked.connect(self.onEdit)
         self.reopenButton.clicked.connect(self.onReopen)
         self.historyDeleteButton.clicked.connect(self.onDelete)
+        # These act on the selected row: pressing one must not clear it first.
+        self.activeTable.keepSelectionFor(
+            [self.editButton, self.settleButton, self.deleteButton]
+        )
+        self.historyTable.keepSelectionFor(
+            [self.historyEditButton, self.reopenButton, self.historyDeleteButton]
+        )
         for table in (self.activeTable, self.historyTable):
             table.wagerActivated.connect(self.editWager)
             table.selectedWagerChanged.connect(self.refreshButtons)

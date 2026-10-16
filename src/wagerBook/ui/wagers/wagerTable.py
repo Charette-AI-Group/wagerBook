@@ -1,9 +1,23 @@
-"""A sortable table of wagers that knows which wager is selected."""
+"""A sortable table of wagers that knows which wager is selected.
+
+A selection lasts only while it is being used. A click anywhere else in the
+window - another control, the blank space under the last row - lets it go,
+so a row picked for an edit or just added does not stay lit long after.
+Buttons that act on the selected row are named with `keepSelectionFor`, or
+pressing one would clear the row it is about to act on.
+"""
 
 from __future__ import annotations
 
-from PySide6.QtCore import QModelIndex, QSortFilterProxyModel, Qt, Signal
-from PySide6.QtWidgets import QAbstractItemView, QHeaderView, QTableView, QWidget
+from PySide6.QtCore import QEvent, QModelIndex, QObject, QSortFilterProxyModel, Qt, Signal
+from PySide6.QtGui import QMouseEvent
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QApplication,
+    QHeaderView,
+    QTableView,
+    QWidget,
+)
 
 from wagerBook.models.wager import Wager
 from wagerBook.ui.wagers.wagerColumns import Column, titleColumn
@@ -41,6 +55,46 @@ class WagerTable(QTableView):
 
         self.doubleClicked.connect(self.onDoubleClicked)
         self.selectionModel().selectionChanged.connect(self.onSelectionChanged)
+
+        # Widgets that use the selection, so pressing them keeps it.
+        self.selectionKeepers: list[QWidget] = []
+        # Every press in the app passes through here first; see eventFilter.
+        app = QApplication.instance()
+        if app is not None:
+            app.installEventFilter(self)
+
+    def keepSelectionFor(self, widgets: list[QWidget]) -> None:
+        """Pressing any of these leaves the selected row selected."""
+        self.selectionKeepers.extend(widgets)
+
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
+        if (
+            event.type() == QEvent.Type.MouseButtonPress
+            and isinstance(watched, QWidget)
+            and self.selectionModel().hasSelection()
+            and self.pressLetsSelectionGo(watched, event)
+        ):
+            self.clearHighlight()
+        return False  # only watching: the press still goes where it was going
+
+    def pressLetsSelectionGo(self, target: QWidget, event: QEvent) -> bool:
+        """Whether a press on this widget is a click away from the selected row."""
+        if target.window() is not self.window():
+            # Another window - the edit form the row opened, say - is not "away".
+            return False
+        if target is self.viewport():
+            # Inside the rows: only the blank space below the last one lets go.
+            position = event.position().toPoint() if isinstance(event, QMouseEvent) else None
+            return position is not None and not self.indexAt(position).isValid()
+        if target is self or self.isAncestorOf(target):
+            return False  # the headers and scroll bars: sorting or scrolling keeps the row
+        return not any(
+            keeper is target or keeper.isAncestorOf(target) for keeper in self.selectionKeepers
+        )
+
+    def clearHighlight(self) -> None:
+        """No row selected and no current cell, so nothing on the table is lit."""
+        self.selectionModel().clear()
 
     def setWagers(self, wagers: list[Wager]) -> None:
         """Replace the rows, keeping the same wager selected when it is still there."""

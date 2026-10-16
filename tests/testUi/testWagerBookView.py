@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import date
 
+from PySide6.QtCore import Qt
+
 from wagerBook.models.wager import Status, Wager
 from wagerBook.services.wagerStore import WagerStore
 from wagerBook.ui.wagers.wagerBookView import WagerBookView
@@ -126,6 +128,41 @@ def testReopenBringsItBack(qtbot, tmp_path) -> None:
     selected = view.activeTable.selectedWager()
     assert selected is not None and selected.id == wager.id
     assert selected.isActive and selected.payout is None
+
+
+def testTheRowButtonsStillWorkOnTheSelectedRow(qtbot, tmp_path, monkeypatch) -> None:
+    """With highlights cleared on any click away, a press on Edit or Settle must not
+    count as one - or the button would disable itself before its click landed."""
+    wager = Wager(title="Rain", stake=10.0, price=0.5)
+    view = makeView(qtbot, tmp_path, [wager])
+    view.resize(1000, 500)
+    view.show()
+    qtbot.waitExposed(view)
+    view.activeTable.selectWager(wager.id)
+    edited: list[str] = []
+    monkeypatch.setattr(
+        "wagerBook.ui.wagers.wagerBookView.editWager",
+        lambda parent, chosen: edited.append(chosen.title) or None,
+    )
+
+    qtbot.mouseClick(view.editButton, Qt.MouseButton.LeftButton)
+
+    assert edited == ["Rain"]
+    assert view.activeTable.selectedWager() is not None
+
+
+def testClickingAddClearsTheOldHighlight(qtbot, tmp_path, monkeypatch) -> None:
+    wager = Wager(title="Rain", stake=10.0, price=0.5)
+    view = makeView(qtbot, tmp_path, [wager])
+    view.show()
+    qtbot.waitExposed(view)
+    view.activeTable.selectWager(wager.id)
+    answerDialog(monkeypatch, "editWager", None)  # Add is cancelled
+
+    qtbot.mouseClick(view.addButton, Qt.MouseButton.LeftButton)
+
+    assert view.activeTable.selectedWager() is None
+    assert not view.editButton.isEnabled()
 
 
 def testDeleteAsksFirstAndHonoursNo(qtbot, tmp_path, monkeypatch) -> None:
