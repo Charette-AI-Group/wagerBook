@@ -12,6 +12,7 @@ from wagerBook.ui.wagers.wagerColumns import (
     activeColumns,
     closedColumns,
     money,
+    oddsPercent,
     percent,
     signedMoney,
     signedPercent,
@@ -28,6 +29,8 @@ def testMoneyAndPercentFormatting() -> None:
     assert signedMoney(-12.0) == "-$12.00"
     assert signedMoney(0.0) == "$0.00"
     assert percent(0.425) == "42.5%"
+    assert oddsPercent(0.11684919) == "11.685%"
+    assert oddsPercent(None) == ""
     assert signedPercent(0.6) == "+60%"
     assert signedPercent(-0.25) == "-25%"
 
@@ -53,7 +56,8 @@ def testActiveRowShowsTheBettingNumbers(qtbot) -> None:
 
     assert texts["Side"] == "No"
     assert texts["Stake"] == "$25.00"
-    assert texts["Odds"] == "40.0%"
+    assert texts["Odds"] == "40.000%"
+    assert texts["Now"] == "55.0%"  # the market's price stays at a tenth
     assert texts["Max Win"] == "$62.50"
     assert texts["Profit If Won"] == "+$37.00"
     assert texts["Return"] == "+148%"

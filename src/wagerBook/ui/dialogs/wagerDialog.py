@@ -44,11 +44,17 @@ def moneySpin(maximum: float = 10_000_000.0) -> QDoubleSpinBox:
     return spin
 
 
+# Thousandths of a percent: enough for Kalshi's 11.685% break-even price
+# (fees spread over the contracts), which its site rounds to 11.69 cents.
+priceDecimals = 3
+
+
 def priceSpin() -> QDoubleSpinBox:
     """A price in percent: 40.0 means 40 cents a contract, a 40% market chance."""
     spin = QDoubleSpinBox()
-    spin.setRange(0.1, 99.9)
-    spin.setDecimals(1)
+    smallest = 10 ** -priceDecimals
+    spin.setRange(smallest, 100 - smallest)
+    spin.setDecimals(priceDecimals)
     spin.setSuffix(" %")
     spin.setSingleStep(1.0)
     spin.setValue(50.0)
@@ -199,12 +205,12 @@ class WagerDialog(QDialog):
 
     @staticmethod
     def keptOrTyped(original: float | None, shown: float | None, typedPercent: float) -> float:
-        """The spin box shows a tenth of a percent; an untouched price keeps every digit.
+        """The spin box shows a thousandth of a percent; an untouched price keeps every digit.
 
         `shown` is what the box displayed when the form opened - read back from it,
-        since its rounding of a half (38.25) need not match Python's. Without this,
-        opening an imported wager and pressing OK would round 0.396271 to 0.396
-        and move its Max Win.
+        since its rounding of a half need not match Python's. Without this, opening
+        an imported wager and pressing OK would round 0.11684919 to 0.11685 and
+        nudge its Max Win.
         """
         if original is not None and shown is not None and abs(typedPercent - shown) < 1e-9:
             return original

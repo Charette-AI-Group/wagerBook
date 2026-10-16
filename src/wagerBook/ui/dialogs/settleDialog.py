@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 
 from wagerBook.models.wager import Status, Wager, closedStatuses
 from wagerBook.ui.dialogs.wagerDialog import fromQDate, moneySpin, toQDate
-from wagerBook.ui.wagers.wagerColumns import money, signedMoney
+from wagerBook.ui.wagers.wagerColumns import money, oddsPercent, signedMoney
 
 Settlement = tuple[Status, float, date]
 
@@ -47,7 +47,7 @@ class SettleDialog(QDialog):
         form.addRow(QLabel(f"<b>{wager.title}</b>"))
         form.addRow(
             "Position",
-            QLabel(f"{wager.side} at {wager.price * 100:.1f}%, staked {money(wager.stake)}"),
+            QLabel(f"{wager.side} at {oddsPercent(wager.price)}, staked {money(wager.stake)}"),
         )
         form.addRow("Outcome", self.outcomeBox)
         form.addRow("Received", self.payoutSpin)

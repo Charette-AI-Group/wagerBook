@@ -177,6 +177,32 @@ def testUntouchedPricesKeepEveryDigitAndTheirTime(qtbot) -> None:
     assert wager.pricedAt == fetched
 
 
+def testPricesTakeThousandthsOfAPercent(qtbot) -> None:
+    """Kalshi's 11.69 cent average is 11.685% unrounded; the form holds that."""
+    dialog = WagerDialog()
+    qtbot.addWidget(dialog)
+
+    dialog.priceSpin.setValue(11.685)
+    dialog.currentSpin.setValue(9.9)
+
+    assert dialog.priceSpin.decimals() == 3
+    assert dialog.priceSpin.text().startswith("11.685")
+    assert dialog.wager().price == pytest.approx(0.11685)
+    dialog.priceSpin.setValue(0.001)
+    assert dialog.priceSpin.value() == pytest.approx(0.001)  # the smallest it takes
+
+
+def testAnExactPriceSurvivesAnUntouchedOk(qtbot) -> None:
+    """99.99 over 855.72 contracts is 11.6849...%: shown as 11.685, kept exact."""
+    original = Wager(title="Republicans sweep", stake=99.99, price=99.99 / 855.72)
+    dialog = WagerDialog(wager=original)
+    qtbot.addWidget(dialog)
+
+    assert dialog.priceSpin.text().startswith("11.685")
+    assert dialog.wager().price == original.price
+    assert dialog.wager().maxPayout == pytest.approx(855.72)
+
+
 def testATypedCurrentPriceCountsAsEnteredByHand(qtbot) -> None:
     original = Wager(title="Paxton", stake=10.0, price=0.4, currentPrice=0.38,
                      pricedAt=datetime(2026, 10, 16, 9, 42))

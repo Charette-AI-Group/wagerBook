@@ -31,6 +31,13 @@ def signedMoney(value: float | None) -> str:
     return f"{sign}${abs(value):,.2f}"
 
 
+def oddsPercent(fraction: float | None) -> str:
+    """The price paid, to a thousandth of a percent: 11.685%, as the edit form shows it."""
+    if fraction is None:
+        return ""
+    return f"{fraction * 100:.3f}%"
+
+
 def percent(fraction: float | None) -> str:
     if fraction is None:
         return ""
@@ -101,7 +108,7 @@ titleColumn = Column(
 )
 sideColumn = Column("Side", lambda w: str(w.side), lambda w: str(w.side))
 stakeColumn = Column("Stake", lambda w: w.stake, lambda w: money(w.stake), numeric=True)
-oddsColumn = Column("Odds", lambda w: w.price, lambda w: percent(w.price), numeric=True)
+oddsColumn = Column("Odds", lambda w: w.price, lambda w: oddsPercent(w.price), numeric=True)
 maxWinColumn = Column(
     "Max Win", lambda w: w.maxPayout, lambda w: money(w.maxPayout), numeric=True
 )
