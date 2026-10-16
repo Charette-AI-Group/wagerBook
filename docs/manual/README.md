@@ -62,6 +62,10 @@ or the asking price can. The line under the table then adds what the priced wage
 now and the gain or loss against what they cost, with the time of the oldest price. Rest the
 pointer on a Now or Value cell to see when that price was fetched, or whether it was typed in.
 
+**Value is green** when the wager is worth more now than it cost - stake and fees together - and
+**red** when it is worth less; plain means break-even, to the cent, or no price yet. The Value
+cell's pointer text gives the gain or loss in dollars.
+
 ### Linking a wager to its market
 
 A wager can only be priced once the app knows which market it is. Open the wager (double-click

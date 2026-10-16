@@ -95,6 +95,18 @@ class Wager:
         return self.contracts * self.currentPrice
 
     @property
+    def unrealizedProfit(self) -> float | None:
+        """What the open position is worth now, less what it cost - stake and fees.
+
+        To the cent: a value a fraction of a cent over its cost is break-even,
+        not a gain worth colouring green.
+        """
+        value = self.markValue
+        if value is None:
+            return None
+        return round(value - self.stake - self.fees, 2)
+
+    @property
     def isActive(self) -> bool:
         return self.status == Status.active
 

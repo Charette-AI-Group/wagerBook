@@ -42,6 +42,20 @@ def testMarkValueNeedsACurrentPrice() -> None:
     assert wager.markValue == pytest.approx(65.0)
 
 
+def testUnrealizedProfitCountsFeesAndRoundsToTheCent() -> None:
+    wager = Wager(title="Open", stake=50.0, price=0.50, fees=0.70)
+    assert wager.unrealizedProfit is None
+
+    wager.currentPrice = 0.65
+    assert wager.unrealizedProfit == pytest.approx(65.0 - 50.0 - 0.70)
+
+    # Kalshi's Republicans sweep: $99.99 for 855.72 contracts, worth 11.685 cents
+    # each - the break-even - comes to a fraction of a cent, which is no gain.
+    sweep = Wager(title="Sweep", stake=99.99, price=99.99 / 855.72,
+                  currentPrice=99.99 / 855.72 + 1e-9)
+    assert sweep.unrealizedProfit == 0.0
+
+
 def testRealizedProfitOnlyOnceClosed() -> None:
     wager = Wager(title="Open", stake=20.0, price=0.25, fees=0.30)
     assert wager.realizedProfit is None

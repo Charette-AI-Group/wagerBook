@@ -124,9 +124,20 @@ nowColumn = Column(
     "Now", lambda w: sortableNumber(w.currentPrice), lambda w: percent(w.currentPrice),
     numeric=True, tip=priceTip,
 )
+def valueTip(wager: Wager) -> str | None:
+    """The price's age, and the gain or loss the colour stands for."""
+    tip = priceTip(wager)
+    gain = wager.unrealizedProfit
+    if gain is None:
+        return tip
+    cost = money(wager.stake + wager.fees)
+    return f"{tip}\n{signedMoney(gain)} against the {cost} it cost"
+
+
+# Green when worth more now than it cost (stake and fees), red when less.
 valueColumn = Column(
     "Value", lambda w: sortableNumber(w.markValue), lambda w: money(w.markValue),
-    numeric=True, tip=priceTip,
+    numeric=True, tone=lambda w: w.unrealizedProfit, tip=valueTip,
 )
 placedColumn = Column(
     "Placed", lambda w: sortableDate(w.placedOn), lambda w: dateText(w.placedOn)

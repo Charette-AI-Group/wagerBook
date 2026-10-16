@@ -119,6 +119,42 @@ def testGainsAndLossesAreColoured(qtbot) -> None:
     assert up == gainColour and down == lossColour
 
 
+def testValueIsGreenAboveWhatTheWagerCostAndRedBelow(qtbot) -> None:
+    table = WagerTable(activeColumns)
+    qtbot.addWidget(table)
+    table.setWagers([
+        # 100 contracts each; worth 100 x the current price.
+        Wager(title="Up", stake=40.0, price=0.4, currentPrice=0.45),        # $45 vs $40
+        Wager(title="Down", stake=40.0, price=0.4, currentPrice=0.35),      # $35 vs $40
+        Wager(title="Even", stake=40.0, price=0.4, currentPrice=0.4),       # $40 vs $40
+        Wager(title="Fees", stake=40.0, price=0.4, fees=1.0, currentPrice=0.405),  # $40.50 vs $41
+        Wager(title="Unpriced", stake=40.0, price=0.4),
+    ])
+    valueColumn = [c.title for c in activeColumns].index("Value")
+    model = table.tableModel
+
+    def colour(row: int):
+        return model.data(model.index(row, valueColumn), Qt.ItemDataRole.ForegroundRole)
+
+    assert colour(0) == gainColour
+    assert colour(1) == lossColour
+    assert colour(2) is None
+    assert colour(3) == lossColour  # above the stake, still below stake plus fees
+    assert colour(4) is None
+
+
+def testTheValueTipSaysWhatTheColourMeans(qtbot) -> None:
+    table = WagerTable(activeColumns)
+    qtbot.addWidget(table)
+    table.setWagers([Wager(title="Down", stake=40.0, price=0.4, fees=1.0, currentPrice=0.35)])
+    valueColumn = [c.title for c in activeColumns].index("Value")
+
+    tip = table.tableModel.data(table.tableModel.index(0, valueColumn), Qt.ItemDataRole.ToolTipRole)
+
+    assert "Entered by hand" in tip
+    assert "-$6.00 against the $41.00 it cost" in tip
+
+
 def testSortingByStakeUsesDollarsNotText(qtbot) -> None:
     table = WagerTable(activeColumns)
     qtbot.addWidget(table)

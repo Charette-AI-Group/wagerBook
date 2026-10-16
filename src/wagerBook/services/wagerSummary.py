@@ -63,7 +63,7 @@ def summarizeActive(wagers: list[Wager]) -> ActiveSummary:
         maxProfit=sum(wager.maxProfit for wager in openOnes),
         priced=len(priced),
         value=sum(wager.markValue or 0.0 for wager in priced),
-        unrealized=sum((wager.markValue or 0.0) - wager.stake - wager.fees for wager in priced),
+        unrealized=sum(wager.unrealizedProfit or 0.0 for wager in priced),
         fetched=len(moments),
         oldestPrice=min(moments) if moments else None,
     )
