@@ -13,7 +13,8 @@ actually paid. PySide6, one JSON file, nothing sent anywhere.
 - **History** tab: closed wagers with the result, payout, realised P&L and return
 - **Add / Edit** dialog that works the contracts, max win and profit out as you type
 - **Update Prices** (F5) fetches what each open wager could be sold for now - the best bid for
-  the side held - from Kalshi's and Polymarket's public market data, off the interface thread;
+  the side held - from Kalshi's and Polymarket's public market data (Polymarket US first,
+  polymarket.com for its own ids), off the interface thread;
   paste a market's web address into Ticker and the app reads the id and the platform from it
 - **Settle** dialog that fills in the usual payout for Won, Lost, Sold or Voided and lets you
   correct it; **Reopen** for a settlement made by mistake

@@ -21,7 +21,9 @@ from wagerBook.services.priceService import (
     PriceService,
     kalshiApi,
     labelInTitle,
+    namesInTitle,
     polymarketApi,
+    polymarketUsApi,
 )
 from wagerBook.services.wagerStore import WagerStore
 
@@ -173,6 +175,68 @@ def testAPolymarketEventPicksTheCandidateAndIgnoresPlaceholders() -> None:
                                   "Andy Biggs (R) - Arizona Governor Election Winner"))
 
     assert quote.ticker == polymarketMarketSlug
+
+
+usEventSlug = "usse-me-2026-11-03"
+usCollinsSlug = "ewc-usse-me-2026-11-03-rep"
+
+
+def testAPolymarketUsEventFindsTheCandidateDespiteAMiddleInitial() -> None:
+    """The US exchange labels the market "Susan M Collins"; the title says "Susan Collins (R)"."""
+    site = FakeSite({f"{polymarketUsApi}/v1/events/slug/{usEventSlug}": "polymarketUsEvent.json"})
+    service = PriceService(site)
+
+    yes = service.quote(request(Platform.polymarket, usEventSlug,
+                                "Susan Collins (R) - Maine Senate Election Winner"))
+    no = service.quote(request(Platform.polymarket, usEventSlug,
+                               "Susan Collins (R) - Maine Senate Election Winner", Side.no))
+
+    markets = json.loads((fixtures / "polymarketUsEvent.json").read_text())["event"]["markets"]
+    collins = next(market for market in markets if market["slug"] == usCollinsSlug)
+    assert yes.ticker == usCollinsSlug
+    assert yes.price == pytest.approx(float(collins["bestBidQuote"]["value"]))
+    assert no.price == pytest.approx(1 - float(collins["bestAskQuote"]["value"]))
+    # Priced on the US exchange alone: polymarket.com was never asked.
+    assert not any(url.startswith(polymarketApi) for url in site.asked)
+
+
+def testAPolymarketUsMarketSlugIsPricedDirectly() -> None:
+    url = f"{polymarketUsApi}/v1/market/slug/{usCollinsSlug}"
+    service = PriceService(FakeSite({url: "polymarketUsMarket.json"}))
+
+    quote = service.quote(request(Platform.polymarket, usCollinsSlug, "anything"))
+
+    market = json.loads((fixtures / "polymarketUsMarket.json").read_text())["market"]
+    assert quote.ticker == usCollinsSlug
+    assert quote.price == pytest.approx(float(market["bestBidQuote"]["value"]))
+
+
+def testAPolymarketComIdFallsThroughTheUsExchange() -> None:
+    """The US exchange answers 404 for polymarket.com ids; those are then priced there."""
+    url = f"{polymarketApi}/markets?slug={polymarketMarketSlug}"
+    site = FakeSite({url: "polymarketMarket.json"})
+
+    quote = PriceService(site).quote(request(Platform.polymarket, polymarketMarketSlug, "x"))
+
+    assert quote.ticker == polymarketMarketSlug
+    assert site.asked[0].startswith(polymarketUsApi)  # the US exchange is asked first
+
+
+def testAClosedPolymarketUsMarketSaysToSettle() -> None:
+    closed = {"market": {"slug": "x", "title": "x", "closed": False,
+                         "status": "MARKET_STATUS_SETTLED",
+                         "bestBidQuote": {"value": "0"}, "bestAskQuote": {"value": "1"}}}
+    site = FakeSite({f"{polymarketUsApi}/v1/market/slug/x": closed})
+    update = PriceService(site).updateAll([request(Platform.polymarket, "x", "t")])
+
+    assert "settle this wager" in update.skipped[0].reason
+
+
+def testFirstAndLastNamesAreASecondTryNotAFirst() -> None:
+    assert namesInTitle("Susan M Collins", "Susan Collins (R) - Maine Senate")
+    assert namesInTitle("Troy Dale Jackson", "Troy Jackson (D)")
+    assert not namesInTitle("Party A", "Republican Party - U.S. House")  # one real word
+    assert not namesInTitle("Susan M Collins", "Collins - Maine Senate")  # first name missing
 
 
 def testAnUnknownPolymarketSlugSaysSo() -> None:

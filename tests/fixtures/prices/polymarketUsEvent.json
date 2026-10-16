@@ -1,0 +1,40 @@
+{
+ "event": {
+  "slug": "usse-me-2026-11-03",
+  "title": "Maine Senate Election Winner",
+  "markets": [
+   {
+    "slug": "ewc-usse-me-2026-11-03-dem",
+    "question": "Maine Senate Election Winner",
+    "title": "Troy Dale Jackson",
+    "titleShort": "Troy Dale Jackson",
+    "closed": false,
+    "status": "MARKET_STATUS_OPEN",
+    "bestBidQuote": {
+     "value": "0.5500",
+     "currency": "USD"
+    },
+    "bestAskQuote": {
+     "value": "0.5600",
+     "currency": "USD"
+    }
+   },
+   {
+    "slug": "ewc-usse-me-2026-11-03-rep",
+    "question": "Maine Senate Election Winner",
+    "title": "Susan M Collins",
+    "titleShort": "Susan M Collins",
+    "closed": false,
+    "status": "MARKET_STATUS_OPEN",
+    "bestBidQuote": {
+     "value": "0.4400",
+     "currency": "USD"
+    },
+    "bestAskQuote": {
+     "value": "0.4500",
+     "currency": "USD"
+    }
+   }
+  ]
+ }
+}

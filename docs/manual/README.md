@@ -70,11 +70,20 @@ browser:
 
 ```
 https://kalshi.com/markets/senatetx/texas-senate-winner/senatetx-26
-https://polymarket.com/event/arizona-governor-winner-2026
+https://polymarket.us/event/usse-me-2026-11-03
 ```
 
 The app reads the address as you leave the box, fills in the market's id, and sets the
-platform. Typing a Kalshi ticker or a Polymarket slug directly works too.
+platform. Typing a Kalshi ticker or a Polymarket id directly works too.
+
+On Polymarket, clicking a position in Portfolio opens a "You bought" card, not the market's
+page. Close it, search for the market with the search box at the top, open it, and copy the
+address from there.
+
+Polymarket US and polymarket.com are separate exchanges with separate prices. The app asks
+Polymarket US first, and polymarket.com only for an id the US exchange does not have, so a
+wager is priced on the exchange its address came from. Copy the address from the site you
+actually trade on.
 
 Many addresses name a whole race, not one candidate. The app then picks the candidate whose
 name appears in the wager's title - "Texas Senate winner? - Ken Paxton" finds Ken Paxton - and

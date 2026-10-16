@@ -1,0 +1,18 @@
+{
+ "market": {
+  "slug": "ewc-usse-me-2026-11-03-rep",
+  "question": "Maine Senate Election Winner",
+  "title": "Susan Collins (R)",
+  "titleShort": "Susan Collins (R)",
+  "closed": false,
+  "status": "MARKET_STATUS_OPEN",
+  "bestBidQuote": {
+   "value": "0.4400",
+   "currency": "USD"
+  },
+  "bestAskQuote": {
+   "value": "0.4500",
+   "currency": "USD"
+  }
+ }
+}

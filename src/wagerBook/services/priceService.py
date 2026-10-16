@@ -6,10 +6,20 @@ Both sites publish prices without a login or key:
               /markets/{ticker}                        one market
               /events/{ticker}?with_nested_markets=true an event and its markets
               price fields: yes_bid_dollars, no_bid_dollars ("0.3800")
-  Polymarket  https://gamma-api.polymarket.com
+  Polymarket US (the CFTC exchange US accounts trade on), tried first
+              https://gateway.polymarket.us
+              /v1/market/slug/{slug}                   one market
+              /v1/events/slug/{slug}                   an event and its markets
+              price fields: bestBidQuote, bestAskQuote ({"value": "0.4400"})
+              ids look like usse-me-2026-11-03 (event), ewc-usse-me-...-rep
+  Polymarket  https://gamma-api.polymarket.com - polymarket.com, when the US
+              exchange has no such id
               /markets?slug={slug}                     one market, in a list
               /events?slug={slug}                      an event and its markets
               price fields: bestBid, bestAsk (for Yes, as numbers)
+
+The two Polymarkets are separate exchanges with separate prices, so a wager
+is priced on the one its id belongs to. Each answers 404 for the other's ids.
 
 The price taken is what the position could be sold for now - the best bid
 for the side held - which is what Kalshi's Cash Out shows. It never flatters
@@ -20,9 +30,11 @@ A ticker can name an event rather than one market: the address of "Texas
 Senate winner?" names the race, and Ken Paxton is one market inside it. The
 market is then picked by its label - "Ken Paxton", "Andy Biggs (R)" - found
 as whole words in the wager's title, and that market's own id is handed back
-so the wager points straight at it next time. When no label or more than one
-matches, the wager is skipped with the choices listed: guessing a price is
-worse than not having one.
+so the wager points straight at it next time. Failing that, a label whose
+first and last names are both in the title will do, so "Susan M Collins"
+still finds "Susan Collins (R)". When no label or more than one matches, the
+wager is skipped with the choices listed: guessing a price is worse than not
+having one.
 
 No Qt here; the worker runs this off the interface thread.
 """
@@ -45,6 +57,8 @@ logger = logging.getLogger(__name__)
 
 kalshiApi = "https://api.elections.kalshi.com/trade-api/v2"
 polymarketApi = "https://gamma-api.polymarket.com"
+polymarketUsApi = "https://gateway.polymarket.us"
+polymarketUsOpen = "MARKET_STATUS_OPEN"
 requestTimeoutSeconds = 10.0
 userAgent = "WagerBook/0.1 (desktop app)"
 
@@ -119,10 +133,26 @@ def labelInTitle(label: str, title: str) -> bool:
     return any(titleWords[i:i + span] == labelWords for i in range(len(titleWords) - span + 1))
 
 
+def namesInTitle(label: str, title: str) -> bool:
+    """The label's first and last names, whole, in the title; initials and middle names aside.
+
+    The second try, for "Susan M Collins" against "Susan Collins (R)". A label of
+    fewer than two real words never matches this way - "Party A" must not match
+    every title with "party" in it.
+    """
+    names = [word for word in words(label) if len(word) > 1]
+    if len(names) < 2:
+        return False
+    titleWords = set(words(title))
+    return names[0] in titleWords and names[-1] in titleWords
+
+
 def pickMarket(markets: list[dict], labelOf: Callable[[dict], str], title: str, what: str) -> dict:
     if len(markets) == 1:
         return markets[0]
     matches = [market for market in markets if labelInTitle(labelOf(market), title)]
+    if not matches:
+        matches = [market for market in markets if namesInTitle(labelOf(market), title)]
     if len(matches) > 1:
         # "Ken Paxton" beats a stray "Paxton": the longest label that fits wins, if alone.
         longest = max(len(words(labelOf(market))) for market in matches)
@@ -136,6 +166,11 @@ def pickMarket(markets: list[dict], labelOf: Callable[[dict], str], title: str, 
             f"Put one of these in the title, or the market's own address in Ticker: {labels}"
         )
     raise PriceLookupError(f"{what} has more than one market matching the title: {labels}")
+
+
+def quoteValue(quote: object) -> object:
+    """Polymarket US wraps prices: {"value": "0.4400", "currency": "USD"}."""
+    return quote.get("value") if isinstance(quote, dict) else None
 
 
 def bidPrice(value: object, what: str) -> float:
@@ -208,32 +243,58 @@ class PriceService:
 
     # -------------------------------------------------------- Polymarket ----
 
-    def polymarketQuote(self, request: PriceRequest) -> PriceQuote:
+    def polymarketUsMarket(self, request: PriceRequest) -> dict | None:
+        """The market on Polymarket US, or None when the id is not one of its own."""
+        slug = urllib.parse.quote(request.ticker, safe="")
+        found = self.getJson(f"{polymarketUsApi}/v1/market/slug/{slug}")
+        if isinstance(found, dict) and isinstance(found.get("market"), dict):
+            return found["market"]
+        event = self.getJson(f"{polymarketUsApi}/v1/events/slug/{slug}")
+        if not isinstance(event, dict) or not isinstance(event.get("event"), dict):
+            return None
+        markets = event["event"].get("markets") or []
+        if not markets:
+            raise PriceLookupError(f"Polymarket event {request.ticker} has no markets")
+        return pickMarket(markets, lambda m: m.get("title") or m.get("titleShort") or "",
+                          request.title, f"Polymarket event {request.ticker}")
+
+    def polymarketComMarket(self, request: PriceRequest) -> dict:
+        """The market on polymarket.com; the last place a Polymarket id can be."""
         slug = urllib.parse.quote(request.ticker, safe="")
         found = self.getJson(f"{polymarketApi}/markets?slug={slug}")
         if isinstance(found, list) and found:
-            market = found[0]
+            return found[0]
+        events = self.getJson(f"{polymarketApi}/events?slug={slug}")
+        if not isinstance(events, list) or not events:
+            raise PriceLookupError(f"Polymarket has no market or event {request.ticker}")
+        markets = events[0].get("markets") or []
+        if not markets:
+            raise PriceLookupError(f"Polymarket event {request.ticker} has no markets")
+        return pickMarket(markets, lambda m: m.get("groupItemTitle") or "",
+                          request.title, f"Polymarket event {request.ticker}")
+
+    def polymarketQuote(self, request: PriceRequest) -> PriceQuote:
+        market = self.polymarketUsMarket(request)
+        if market is not None:
+            status = market.get("status")
+            closed = bool(market.get("closed")) or (bool(status) and status != polymarketUsOpen)
+            bid = quoteValue(market.get("bestBidQuote"))
+            ask = quoteValue(market.get("bestAskQuote"))
         else:
-            events = self.getJson(f"{polymarketApi}/events?slug={slug}")
-            if not isinstance(events, list) or not events:
-                raise PriceLookupError(f"Polymarket has no market or event {request.ticker}")
-            markets = events[0].get("markets") or []
-            if not markets:
-                raise PriceLookupError(f"Polymarket event {request.ticker} has no markets")
-            market = pickMarket(markets, lambda m: m.get("groupItemTitle") or "",
-                                request.title, f"Polymarket event {request.ticker}")
+            market = self.polymarketComMarket(request)
+            closed = bool(market.get("closed"))
+            bid, ask = market.get("bestBid"), market.get("bestAsk")
         name = market.get("slug") or request.ticker
-        if market.get("closed"):
+        if closed:
             raise PriceLookupError(f"Polymarket market {name} has closed; settle this wager")
         what = f"Polymarket market {name}"
         if request.side == Side.yes:
-            price = bidPrice(market.get("bestBid"), what)
+            price = bidPrice(bid, what)
         else:
             # Only the Yes book is quoted: selling No is meeting the best Yes ask.
-            ask = market.get("bestAsk")
             if ask is None:
                 raise PriceLookupError(f"{what} has no price quoted")
-            price = bidPrice(1.0 - float(ask), what)
+            price = bidPrice(1.0 - float(ask), what)  # type: ignore[arg-type]
         return PriceQuote(request.wagerId, round(price, 6), name)
 
     # ---------------------------------------------------------- the lot ----
