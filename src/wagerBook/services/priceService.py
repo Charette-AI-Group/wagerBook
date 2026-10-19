@@ -52,6 +52,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from wagerBook.models.wager import Platform, Side, Wager
+from wagerBook.services import httpsService
 
 logger = logging.getLogger(__name__)
 
@@ -190,7 +191,7 @@ Opener = Callable[..., object]
 
 
 class PriceService:
-    def __init__(self, opener: Opener = urllib.request.urlopen) -> None:
+    def __init__(self, opener: Opener = httpsService.openUrl) -> None:
         self.opener = opener
         self.cache: dict[str, object | None] = {}
 

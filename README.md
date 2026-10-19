@@ -28,6 +28,20 @@ actually paid. PySide6, one JSON file, nothing sent anywhere.
 
 The user manual is in [`docs/manual/README.md`](docs/manual/README.md), with the arithmetic.
 
+## Download
+
+Users do not need Python. [Releases](https://github.com/Charette-AI-Group/wagerBook/releases)
+carry a Windows installer, a Windows portable zip and a macOS app bundle:
+
+| File | For |
+|------|-----|
+| `wagerBookSetup-<version>.exe` | Windows. Per-user install, no administrator rights; adds a Start menu entry |
+| `WagerBook-<version>-portable.zip` | Windows, without installing: unzip anywhere and run `WagerBook.exe` |
+| `WagerBook-<version>-macos.zip` | macOS: unzip and drag `WagerBook.app` to Applications |
+
+Your book stays in `%APPDATA%\Wager Book` (on macOS, the user's application data folder), not
+in the install folder, so upgrading or uninstalling never touches your wagers.
+
 ## One-time setup
 
 ```powershell
@@ -66,6 +80,66 @@ ruff check src tests
 change through a temporary file, so a crash mid-write leaves the previous book intact.
 `settings.ini` beside it holds the theme choice and the window's last position and size.
 
+## Standalone builds and releases
+
+The release files are built by [`.github/workflows/build.yml`](.github/workflows/build.yml), the
+same pipeline as 26FRWB: every push runs the tests on Windows and macOS and builds both; pushing
+a version tag also publishes a GitHub Release with the builds attached.
+
+To build them yourself:
+
+```powershell
+pip install -e ".[build]"
+python tools\buildExe.py
+python tools\buildInstaller.py
+```
+
+| Step | Produces | Notes |
+|------|----------|-------|
+| `tools/buildExe.py` on Windows | `dist\WagerBook\` | One-folder PyInstaller bundle, about 120 MB |
+| `tools/buildExe.py` on macOS | `dist/WagerBook.app` | Application bundle, from the same spec |
+| `tools\buildInstaller.py` | `dist\wagerBookSetup-<version>.exe` | Inno Setup 6, about 33 MB. Needs `winget install JRSoftware.InnoSetup`. Windows only |
+
+`tools/buildExe.py` inventories what landed in the bundle - the icon, the manual, certifi's
+certificate list - and then runs the built app's `--selftest report.txt`, which also builds the
+window offscreen against a scratch book. A windowed build has no console, so asking it is the
+only proof it starts; the script refuses to call a bundle shippable until it answers.
+
+The certificate list matters for Update Prices: a standalone macOS build often finds no system
+list, and every https request would then fail as if the price sites were down.
+`services/httpsService.py` uses certifi's list everywhere, so the answer is the same from
+source and from every build.
+
+### A note for macOS users
+
+The app bundle is **not code-signed or notarised**, so Gatekeeper will refuse it on first open
+with a message about an unidentified developer. Right-click the app and choose **Open**, which
+offers a button the plain double-click does not, or clear the quarantine flag:
+
+```bash
+xattr -dr com.apple.quarantine WagerBook.app
+```
+
+Signing needs a paid Apple Developer account, which this project does not have.
+
+### Publishing a release
+
+Tag a commit whose `appConfig.appVersion` matches. The workflow refuses a tag that disagrees,
+because a release named after a version the app does not report leaves a bug report
+unanswerable.
+
+```powershell
+git tag -a v0.1.0 -m "What changed in this release" ; git push origin v0.1.0
+```
+
+The tag's message becomes the release notes. `git tag` deletes lines starting with `#` by
+default, so if the notes use Markdown headings, write them to a file and tag with
+`--cleanup=whitespace` instead:
+
+```powershell
+git tag -a v0.1.1 --cleanup=whitespace -F notes.md ; git push origin v0.1.1
+```
+
 ## App icon
 
 The icon - a book cover with the odds on it: a ring split green and coral around a check
@@ -102,6 +176,10 @@ Every change goes through `WagerStore` and both tabs are redrawn from it, so the
 truth and nothing to keep in step by hand. Services import no Qt widgets.
 
 See `AGENTS.md` for architecture and naming conventions (for you and AI agents).
+
+## License
+
+[MIT](LICENSE), copyright Charette AI Group, LLC.
 
 ---
 *Created from the Qt App Template.*

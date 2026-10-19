@@ -11,6 +11,7 @@ import logging
 import urllib.request
 
 from wagerBook import appConfig
+from wagerBook.services import httpsService
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 class ManualService:
     """Asks the published manual whether it is there."""
 
-    def __init__(self, opener=urllib.request.urlopen) -> None:
+    def __init__(self, opener=httpsService.openUrl) -> None:
         self.opener = opener
 
     def isOnlineCopyAvailable(self, url: str | None = None) -> bool:

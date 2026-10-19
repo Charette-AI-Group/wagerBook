@@ -1,10 +1,14 @@
 [project]
 name = "wager-book"
 version = "0.1.0"
-description = "Wager Book desktop app (PySide6)"
+description = "Wager Book - a book of Kalshi and Polymarket wagers, open and closed (PySide6)"
+license = { text = "MIT" }
 requires-python = ">=3.14"
 dependencies = [
     "PySide6>=6.6,<7",
+    # The certificate list https requests are checked against, shipped with the
+    # app so a standalone Mac build can reach the price sites. See httpsService.
+    "certifi>=2024.2.2",
 ]
 
 [project.optional-dependencies]
@@ -12,6 +16,14 @@ dev = [
     "pytest>=8.0,<9",
     "pytest-qt>=4.4,<5",
     "ruff>=0.4,<1",
+]
+# Only needed to produce a standalone build; see tools/buildExe.py. Kept out
+# of dev so a checkout that only runs the app and the tests stays smaller.
+build = [
+    "pyinstaller>=6.16,<7",
+    # macOS only, and only at build time: PyInstaller renders the .icns the
+    # bundle needs from the 1024 px PNG through Pillow.
+    "pillow>=10,<12; sys_platform == 'darwin'",
 ]
 
 [project.scripts]

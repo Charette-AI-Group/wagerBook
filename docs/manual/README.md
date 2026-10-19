@@ -4,6 +4,21 @@ Wager Book keeps a record of the wagers you place on **Kalshi** and **Polymarket
 ones still open, and every one that has closed, with what it actually paid. Nothing is sent
 anywhere; the book is a file on your own machine.
 
+## Installing
+
+Download the latest release from
+[github.com/Charette-AI-Group/wagerBook/releases](https://github.com/Charette-AI-Group/wagerBook/releases):
+
+- **Windows**: run `wagerBookSetup-<version>.exe`. It installs for you alone, without asking for
+  administrator rights, and adds Wager Book to the Start menu. If you would rather not install
+  anything, unzip `WagerBook-<version>-portable.zip` anywhere and run `WagerBook.exe`.
+- **macOS**: unzip `WagerBook-<version>-macos.zip` and drag `WagerBook.app` to Applications. The
+  first time, right-click it and choose **Open**: the app is not signed by Apple, so a plain
+  double-click is refused.
+
+Installing a newer version replaces the old one. Your book is kept separately, so upgrading or
+uninstalling never touches your wagers.
+
 ## The two tabs
 
 **Active** holds every wager that has not been settled yet. **History** holds every wager that

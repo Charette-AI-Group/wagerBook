@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 appName = "Wager Book"
@@ -25,16 +26,31 @@ donateTextColour = "#1f1e1b"
 donatePressedColour = "#d9991f"
 
 projectRoot = Path(__file__).resolve().parents[2]
-resourcesDir = Path(__file__).resolve().parent / "resources"
+
+# In a bundled build the package lives inside an archive rather than on disk,
+# so bundled files come from the extraction directory instead. Getting this
+# wrong is the classic "works from source, no icon in the .exe" bug.
+isFrozen = bool(getattr(sys, "frozen", False))
+# What everything bundled hangs off: the extraction directory when frozen,
+# the checkout when not.
+bundleRoot = Path(getattr(sys, "_MEIPASS", projectRoot)) if isFrozen else projectRoot
+if isFrozen:
+    resourcesDir = bundleRoot / "wagerBook" / "resources"
+else:
+    resourcesDir = Path(__file__).resolve().parent / "resources"
+# The standalone build's names. No spaces in the executable or its folder,
+# which scripts and the installer must otherwise quote; people see appName.
+executableName = "WagerBook"
 # Drawn by tools/makeIcons.py. The app runs without one if it is missing.
 iconFile = resourcesDir / "wagerBook.ico"
 # Windows groups taskbar buttons by this ID. Without one, a window started by
 # pythonw.exe is filed under Python and shows Python's icon, not this app's.
 appUserModelId = f"{organizationName}.WagerBook"
 
-# Help > User Manual. The copy in the checkout is what a new app has, and it is
-# enough: the menu item works from the first run rather than being a promise.
-manualPath = projectRoot / "docs" / "manual" / "README.md"
+# Help > User Manual, the offline fallback. Rooted at the bundle when frozen
+# and at the checkout otherwise, for the same reason resourcesDir is: a built
+# app has no source tree above it, and projectRoot would climb out of it.
+manualPath = bundleRoot / "docs" / "manual" / "README.md"
 # The manual is pushed to GitHub, which renders the markdown and shows the
 # screenshots a local .md opened in an editor does not, so the published copy
 # is preferred, with the local one as the offline fallback. The app checks the
