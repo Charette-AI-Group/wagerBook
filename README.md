@@ -104,7 +104,8 @@ python tools\buildInstaller.py
 | `tools\buildInstaller.py` | `dist\wagerBookSetup-<version>.exe` | Inno Setup 6, about 33 MB. Needs `winget install JRSoftware.InnoSetup`. Windows only |
 
 `tools/buildExe.py` inventories what landed in the bundle - the icon, the manual, certifi's
-certificate list - and then runs the built app's `--selftest report.txt`, which also builds the
+certificate list - checks on Windows that `WagerBook.exe` carries the app's version in its
+Properties > Details (stamped from `appConfig` by `tools/windowsVersionInfo.py`), and then runs the built app's `--selftest report.txt`, which also builds the
 window offscreen against a scratch book. A windowed build has no console, so asking it is the
 only proof it starts; the script refuses to call a bundle shippable until it answers.
 

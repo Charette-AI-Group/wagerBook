@@ -27,7 +27,18 @@ isMac = sys.platform == "darwin"
 # imports nothing but the standard library, so reading it costs nothing and
 # a bundle can never claim a version the application does not report.
 sys.path.insert(0, str(projectRoot / "src"))
+sys.path.insert(0, str(projectRoot / "tools"))
 from wagerBook import appConfig  # noqa: E402
+
+# Windows only: the version, company and copyright that Explorer's Properties >
+# Details shows, built from appConfig so the file cannot disagree with the
+# About box. macOS carries the same in the bundle's Info.plist below.
+if isMac:
+    windowsVersion = None
+else:
+    from windowsVersionInfo import versionInfo  # noqa: E402
+
+    windowsVersion = versionInfo(appConfig)
 
 # PyInstaller wants the platform's own icon format. Windows takes the
 # multi-size .ico; macOS takes .icns, which PyInstaller renders from this PNG
@@ -92,6 +103,7 @@ executable = EXE(
     exclude_binaries=True,
     name=appConfig.executableName,
     icon=appIcon,
+    version=windowsVersion,
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

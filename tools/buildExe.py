@@ -22,6 +22,8 @@ from pathlib import Path
 projectRoot = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(projectRoot / "src"))
 
+from windowsVersionInfo import readFileVersion, versionTuple  # noqa: E402
+
 from wagerBook import appConfig  # noqa: E402
 
 specFile = projectRoot / "wagerBook.spec"
@@ -114,7 +116,22 @@ def checkPayload() -> list[str]:
     for relative in refusedPayload:
         if shippedSomewhere(relative):
             problems.append(f"should not have shipped: {relative}")
+    problems += checkVersionStamp()
     return problems
+
+
+def checkVersionStamp() -> list[str]:
+    """On Windows, ask Windows what version the .exe says it is."""
+    if isMac:
+        return []
+    expected = ".".join(str(part) for part in versionTuple(appConfig.appVersion))
+    stamped = readFileVersion(executable)
+    if stamped is None:
+        return [f"{executable.name} carries no version stamp"]
+    if stamped != expected:
+        return [f"{executable.name} is stamped {stamped}, the app is {expected}"]
+    print(f"Version stamp: {stamped}")
+    return []
 
 
 def runSelfTest() -> list[str]:
