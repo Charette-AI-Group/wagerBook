@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wager Book — Every Kalshi and Polymarket Wager in One Book</title>
+  <meta name="description"
+    content="Wager Book keeps every wager you place on Kalshi and Polymarket in one table: stake, odds, max win, today's sell price and what each closed wager actually paid. Free for Windows and macOS.">
+  <meta name="author" content="Charette AI Group">
+  <link rel="icon" href="img/icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <nav class="siteNav">
+    <div class="wrap">
+      <a class="brand" href="#top"><img src="img/icon.png" alt="">Wager Book</a>
+      <div class="navLinks">
+        <a href="#purpose">Why</a>
+        <a href="#quickstart">Quick start</a>
+        <a href="#manual">Manual</a>
+        <a href="#privacy">Privacy</a>
+        <a class="btnSmall" href="#download">Download<span class="wideOnly"> Wager Book</span></a>
+        <a class="btnSmall btnDonate" href="https://www.paypal.com/donate/?hosted_button_id=FEM4WLD7LHY36"
+          target="_blank" rel="noopener">Donate</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ------------------------------------------------------------ hero -->
+  <header class="hero" id="top">
+    <div class="wrap heroGrid">
+      <div class="heroText">
+        <img class="heroIcon" src="img/icon.png" alt="Wager Book icon">
+        <h1>Every wager you place, in one book.</h1>
+        <p class="heroLead">Wager Book keeps your Kalshi and Polymarket wagers side by side: what you
+          staked, the odds you got, the most each can pay, what it is worth <em>today</em>, and what
+          every closed wager actually paid. One table, both sites, the whole history.</p>
+        <div class="btnRow">
+          <a class="btn btnPrimary" href="#download">Download free</a>
+          <a class="btn btnGhost" href="#manual">Read the manual</a>
+        </div>
+        <p class="fineprint">Version 0.1.0 &middot; Windows and macOS &middot; free and open source &middot;
+          your book stays on your own machine</p>
+      </div>
+      <div>
+        <img class="heroShot" src="img/mainWindow.png"
+          alt="The Wager Book window: five open wagers from Kalshi and Polymarket with stake, odds, max win, today's price and value">
+      </div>
+    </div>
+  </header>
+
+  <!-- --------------------------------------------------------- purpose -->
+  <section class="band" id="purpose">
+    <div class="wrap">
+      <div class="bandHead">
+        <h2>Why not just use the sites' portfolio pages?</h2>
+        <p>Each site shows its own positions, in its own words, and a wager that has closed slips into
+          a history list you have to dig for. Neither can tell you how you are doing across both.</p>
+      </div>
+
+      <p style="max-width:780px">Wager Book is the record the sites leave out: <strong>one place for
+        every wager, open or closed</strong>. Open wagers sit on the <em>Active</em> tab with today's
+        sell price beside what you paid. When a market resolves you settle the wager with what actually
+        came back, and it moves to <em>History</em>, where the win rate and the net result add up on
+        their own.</p>
+
+      <p style="max-width:780px">The arithmetic is the sites' own. Both sell contracts that pay $1 when
+        your side is right, so the price you paid is the market's chance of winning, the stake buys a
+        number of contracts, and the most a wager can pay is one dollar per contract. Wager Book works it
+        out as you type and shows its working in the manual.</p>
+
+      <h3>What it is for</h3>
+      <div class="cards">
+        <div class="card">
+          <h3>Both sites in one table</h3>
+          <p>A Kalshi Senate race next to a Polymarket Super Bowl market, in the same columns, sorted
+            however you like.</p>
+        </div>
+        <div class="card">
+          <h3>The whole history</h3>
+          <p>Every won, lost, sold and voided wager, with its payout and P&amp;L, and a win rate that
+            counts only the markets that were actually decided.</p>
+        </div>
+        <div class="card">
+          <h3>Today's value, honestly</h3>
+          <p>Update Prices asks both sites what each position could be sold for now - the bid, not the
+            last trade - so the book never flatters a wager.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------ quickstart -->
+  <section class="band alt" id="quickstart">
+    <div class="wrap">
+      <div class="bandHead">
+        <h2>Quick start</h2>
+        <p>Four steps from an empty book to one that keeps itself current.</p>
+      </div>
+
+      <ol class="steps">
+        <li><strong>Add a wager.</strong> Press <em>Add…</em> or <kbd>Ctrl</kbd>+<kbd>N</kbd> and enter
+          the stake and the price you paid. Or bring a whole file in with <em>File &rsaquo; Import
+          CSV…</em>.</li>
+        <li><strong>Link it to its market.</strong> Paste the market's web address from your browser into
+          <em>Ticker / Market Id</em>. The app reads the market and the platform from it.</li>
+        <li><strong>Press Update Prices.</strong> Or <kbd>F5</kbd>. <em>Now</em> and <em>Value</em> fill
+          in, green where a wager is up on what it cost and red where it is down.</li>
+        <li><strong>Settle it when it resolves.</strong> Choose Won, Lost, Sold or Voided; the usual
+          payout is filled in for you. The wager moves to <em>History</em>.</li>
+      </ol>
+
+      <figure>
+        <img src="img/history.png"
+          alt="The History tab: closed wagers with their result, payout, P&amp;L and return, and the totals underneath">
+        <figcaption>The History tab. The line underneath counts the outcomes, the win rate and the net
+          result across every closed wager.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------- manual -->
+  <section class="band" id="manual">
+    <div class="wrap">
+      <div class="bandHead">
+        <h2>User manual</h2>
+        <p>Everything the application does, in the order you meet it.</p>
+      </div>
+
+      <div class="manualGrid">
+        <nav class="toc">
+          <strong>Contents</strong>
+          <ol>
+            <li><a href="#installing">Installing</a></li>
+            <li><a href="#tabs">The two tabs</a></li>
+            <li><a href="#adding">Adding a wager</a></li>
+            <li><a href="#numbers">How the numbers work</a></li>
+            <li><a href="#linking">Linking to a market</a></li>
+            <li><a href="#prices">Updating prices</a></li>
+            <li><a href="#settling">Settling a wager</a></li>
+            <li><a href="#importing">Importing and exporting</a></li>
+            <li><a href="#editing">Editing and sorting</a></li>
+            <li><a href="#appearance">Theme, window, manual</a></li>
+            <li><a href="#data">Where your book lives</a></li>
+            <li><a href="#troubleshooting">Troubleshooting</a></li>
+          </ol>
+        </nav>
+
+        <div class="manualBody">
+
+          <section id="installing">
+            <h2>1. Installing</h2>
+            <p><strong>Windows.</strong> Run <code>wagerBookSetup-0.1.0.exe</code>. It installs for your
+              user account only, so there is no administrator prompt and nothing lands in
+              <code>Program Files</code>. If you would rather not install anything, take the portable zip
+              instead, unpack it anywhere and run <code>WagerBook.exe</code> from the folder.</p>
+            <p><strong>macOS.</strong> Unzip and drag <code>WagerBook.app</code> to Applications.</p>
+            <div class="note">
+              <p><strong>macOS will refuse it the first time.</strong> The app is not code-signed, which
+                needs a paid Apple Developer account this project does not have. Right-click the app and
+                choose <strong>Open</strong> — that dialog has a button the plain double-click does not.
+                Or clear the flag from a terminal: <code>xattr -dr com.apple.quarantine WagerBook.app</code>.</p>
+            </div>
+            <p>Installing a newer version replaces the old one. Your book is kept in your own user folder,
+              apart from the application, so upgrading or uninstalling never touches your wagers.</p>
+          </section>
+
+          <section id="tabs">
+            <h2>2. The two tabs</h2>
+            <p><strong>Active</strong> holds every wager that has not been settled yet.
+              <strong>History</strong> holds every one that has: won, lost, sold early, or voided.
+              Settling a wager moves it from one tab to the other, and <em>Reopen</em> moves it back.</p>
+            <p>The line under each table adds up what is in it. Under Active: how many are open, the total
+              staked, the most they could pay, the profit if every one won, and what the priced ones are
+              worth now. Under History: the outcomes, the win rate, what went in, what came back and the
+              net result.</p>
+          </section>
+
+          <section id="adding">
+            <h2>3. Adding a wager</h2>
+            <p>Click <strong>Add…</strong> on the Active tab, or press <kbd>Ctrl</kbd>+<kbd>N</kbd>.</p>
+
+            <figure>
+              <img src="img/editWager.png"
+                alt="The wager form: platform, category, title, ticker, side, price, stake, fees, dates, current price and notes, with a summary line">
+              <figcaption>The line above the buttons works it out as you type: contracts, the most the
+                wager can pay, the profit if it wins, and what it is worth now.</figcaption>
+            </figure>
+
+            <div class="tableScroll">
+              <table>
+                <thead>
+                  <tr><th>Field</th><th>What to put in it</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Platform</td><td>Kalshi or Polymarket</td></tr>
+                  <tr><td>Category</td><td>Politics, Sports, Economics and so on; type your own if none fits</td></tr>
+                  <tr><td>Title</td><td>The market question, as the site words it. For a race with several candidates, include your candidate's name</td></tr>
+                  <tr><td>Ticker / Market Id</td><td>Paste the market's web address, or type its ticker. Needed for Update Prices</td></tr>
+                  <tr><td>Side</td><td>Yes or No — the side you bought</td></tr>
+                  <tr><td>Price</td><td>What you paid per contract, as a percent to a thousandth: <code>40.000 %</code> is 40 cents</td></tr>
+                  <tr><td>Stake</td><td>The dollars you put in</td></tr>
+                  <tr><td>Fees</td><td>What the site charged, if you keep it separate from the stake</td></tr>
+                  <tr><td>Placed On, Closes On</td><td>When you bought, and when the market is expected to resolve</td></tr>
+                  <tr><td>Current Price</td><td>Filled in by Update Prices; type one only for a market it cannot reach</td></tr>
+                  <tr><td>Notes</td><td>Why you took it, what to watch for</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="numbers">
+            <h2>4. How the numbers work</h2>
+            <p>Both sites sell contracts that pay <strong>$1</strong> if your side is right and nothing if
+              it is not. Everything in the table follows from that:</p>
+            <div class="tableScroll">
+              <table>
+                <thead><tr><th>Column</th><th>Worked out as</th></tr></thead>
+                <tbody>
+                  <tr><td>Odds</td><td>The price you paid per contract - the market's chance that your side wins</td></tr>
+                  <tr><td>Max Win</td><td>Stake &divide; Price: the number of contracts, each worth $1</td></tr>
+                  <tr><td>Profit If Won</td><td>Max Win &minus; Stake &minus; Fees</td></tr>
+                  <tr><td>Return</td><td>Profit If Won &divide; Stake</td></tr>
+                  <tr><td>Now</td><td>What one contract could be sold for today</td></tr>
+                  <tr><td>Value</td><td>Contracts &times; Now</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>A worked example: $99.99 on Yes at an average of 11.685 cents.</p>
+            <div class="sum">contracts      $99.99 / $0.11685   = 855.72
+max win        855.72 x $1         = $855.72
+profit if won  $855.72 - $99.99    = +$755.73</div>
+            <p>A <strong>No</strong> wager uses the No price: buying No at 70 cents is a 70% chance in the
+              market's eyes, not 30%.</p>
+            <div class="note">
+              <p><strong>Fees and the average price.</strong> Kalshi takes its trading fee when your order
+                fills and includes it in the cost, so its "average price" sits a little above the price you
+                bought at. Enter the cost as the stake with fees at $0, or split them - the profit if won
+                comes out the same either way.</p>
+            </div>
+          </section>
+
+          <section id="linking">
+            <h2>5. Linking a wager to its market</h2>
+            <p>A wager can only be priced once the app knows which market it is. Open the wager
+              (double-click it), click in <strong>Ticker / Market Id</strong>, and paste the address of the
+              market's page from your browser:</p>
+            <div class="sum">https://kalshi.com/markets/senatetx/texas-senate-winner/senatetx-26
+https://polymarket.us/event/usse-me-2026-11-03</div>
+            <p>The app reads the address as you leave the box, fills in the market's id and sets the
+              platform. Typing a Kalshi ticker or a Polymarket id directly works too.</p>
+            <p>Many addresses name a whole race, not one candidate. The app picks the candidate whose name
+              is in the wager's title - "Texas Senate winner? - Ken Paxton" finds Ken Paxton - and stores
+              that market's own id, so the next update goes straight to it. A middle initial on the site
+              ("Susan M Collins") still matches a title without one.</p>
+            <ul>
+              <li><strong>On Polymarket</strong>, clicking a position in Portfolio opens a "You bought" card,
+                not the market. Close it, search for the market at the top of the site, open it, and copy
+                the address from there.</li>
+              <li><strong>Polymarket US and polymarket.com</strong> are separate exchanges with separate
+                prices. The app asks Polymarket US first and polymarket.com only for an id the US exchange
+                does not have, so copy the address from the site you actually trade on.</li>
+            </ul>
+          </section>
+
+          <section id="prices">
+            <h2>6. Updating prices</h2>
+            <p>Click <strong>Update Prices</strong> above the Active table, or press <kbd>F5</kbd>. The app
+              asks Kalshi and Polymarket for the current price of every linked wager. It takes a second or
+              two, and the window stays usable while it runs. Both sites publish prices publicly, so no
+              login or API key is involved and nothing about your account is sent.</p>
+            <p>The price taken is the one you could <strong>sell at right now</strong>: the best bid for the
+              side you hold. That is what Kalshi's Cash Out uses, and it never flatters a position the way
+              the last trade or the asking price can.</p>
+            <div class="tableScroll">
+              <table>
+                <thead><tr><th>Value colour</th><th>Meaning</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="swatch swatchGain"></span><span class="gain">Green</span></td><td>Worth more now than it cost, stake and fees together</td></tr>
+                  <tr><td><span class="swatch swatchLoss"></span><span class="loss">Red</span></td><td>Worth less now than it cost</td></tr>
+                  <tr><td><span class="swatch swatchPlain"></span>Plain</td><td>Break-even to the cent, or no price yet</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>Rest the pointer on a Now or Value cell to see when its price was fetched and the gain or
+              loss in dollars. The line under the table says how many prices were fetched and how old the
+              oldest one is, so a price typed in by hand is never passed off as today's.</p>
+            <h4>When a wager is not priced</h4>
+            <ul>
+              <li><strong>No ticker yet</strong> - the status bar counts these. Link them as above.</li>
+              <li><strong>Cannot be matched, closed, or nobody is bidding</strong> - a box lists each wager
+                and the reason. A closed market means the wager should be settled.</li>
+              <li><strong>No connection</strong> - nothing is changed, and the box says which site did not
+                answer.</li>
+            </ul>
+          </section>
+
+          <section id="settling">
+            <h2>7. Settling a wager</h2>
+            <p>When a market resolves, select the wager on the Active tab and click
+              <strong>Settle…</strong>. Choose the outcome and the usual payout is filled in - the full Max
+              Win for a win, nothing for a loss, the stake back for a voided market - and can be changed to
+              what actually arrived. For a position you sold before the market resolved, choose
+              <strong>Sold</strong> and enter what you got for it.</p>
+            <figure>
+              <img src="img/settleWager.png" alt="The settle form: outcome, amount received, date, and the net result">
+              <figcaption>The net result updates as you change the amount received.</figcaption>
+            </figure>
+            <p>Settled by mistake? Select it on the History tab and click <strong>Reopen</strong>.</p>
+          </section>
+
+          <section id="importing">
+            <h2>8. Importing and exporting</h2>
+            <p><strong>File &rsaquo; Import CSV…</strong> reads wagers out of a file so they do not have to
+              be typed one at a time. A preview shows how many rows will be added, how many are already in
+              the book, and every row it could not read with the reason. Nothing reaches the book until you
+              click <strong>Import</strong>.</p>
+            <figure>
+              <img src="img/importPreview.png" alt="The import preview: four Kalshi positions ready to add, with their results">
+              <figcaption>Rows that carry a result arrive already settled, with their payout and date.</figcaption>
+            </figure>
+            <ul>
+              <li><strong>Kalshi</strong> - on the website, the account menu's <em>Documents</em> has the
+                transaction history as a CSV per year. The importer reads the layouts Kalshi has used.</li>
+              <li><strong>Polymarket</strong> - there is no official download; third-party exporters write an
+                <code>activity.csv</code> the importer reads.</li>
+              <li><strong>Your own spreadsheet</strong> - run <em>File &rsaquo; Export CSV…</em> once for the
+                header row, fill it in, and import it back.</li>
+            </ul>
+            <p>Sells and redemptions are listed rather than imported - settle the matching wager instead -
+              and a row for the same market, side and day as one already in the book is skipped, so
+              importing a file twice adds nothing. <strong>File &rsaquo; Export CSV…</strong> writes every
+              wager to a file for a spreadsheet or a backup.</p>
+          </section>
+
+          <section id="editing">
+            <h2>9. Editing, deleting and sorting</h2>
+            <p>Double-click a row, or select it and click <strong>Edit…</strong>, to change any field. A
+              price you leave alone keeps every digit it had. <strong>Delete</strong> asks first and removes
+              the wager for good; a wager that lost should be settled as Lost instead, so the History totals
+              stay true.</p>
+            <p>Click a column heading to sort by it, and again to reverse. Money columns sort by amount, not
+              by the text. A highlighted row clears as soon as you click anywhere else.</p>
+          </section>
+
+          <section id="appearance">
+            <h2>10. Theme, window and manual</h2>
+            <p><strong>Help &rsaquo; Theme</strong> chooses light, dark, or whatever your system is set to,
+              which is the default. The window reopens where you last closed it, at the same size.</p>
+            <figure>
+              <img src="img/mainWindowLight.png" alt="The same Wager Book window on a light theme">
+              <figcaption>The same window on a light theme.</figcaption>
+            </figure>
+            <p><strong>Help &rsaquo; User Manual</strong> (<kbd>F1</kbd>) opens
+              <a href="https://github.com/Charette-AI-Group/wagerBook/blob/main/docs/manual/README.md">the
+              manual on GitHub</a>, and falls back to the copy inside the application when there is no
+              network.</p>
+          </section>
+
+          <section id="data">
+            <h2>11. Where your book lives</h2>
+            <p>The whole book is one file, <code>wagers.json</code>, in your own user folder - on Windows,
+              <code>%APPDATA%\Wager Book</code>. It is rewritten through a temporary file on every change, so
+              a crash mid-save leaves the previous book intact. Copy it to back it up.</p>
+            <p><code>settings.ini</code> beside it remembers the theme and the window's position. Delete it
+              to start from the defaults; your wagers are not in it.</p>
+          </section>
+
+          <section id="troubleshooting">
+            <h2>12. Troubleshooting</h2>
+            <h4>Update Prices skips a wager</h4>
+            <p>It has no ticker yet, or the race it names has several candidates and none of their names is
+              in the title. The box lists the choices: add the name to the title, or paste the candidate's
+              own market address.</p>
+
+            <h4>Every wager says the site could not be reached</h4>
+            <p>The computer is offline, or a firewall blocks the app. Nothing was changed; try again once the
+              connection is back.</p>
+
+            <h4>My Polymarket price differs from the site</h4>
+            <p>Check the address came from the exchange you trade on - Polymarket US and polymarket.com are
+              different markets. And remember the app shows the sell price, a little below the buy price the
+              site's buttons show.</p>
+
+            <h4>The app opened with an empty book</h4>
+            <p>If <code>wagers.json</code> was damaged the app says so at start-up and opens empty without
+              overwriting it. Move the file aside, or fix it in a text editor, and start again.</p>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- --------------------------------------------------------- privacy -->
+  <section class="band alt" id="privacy">
+    <div class="wrap">
+      <div class="bandHead">
+        <h2>What it does with your data</h2>
+        <p>A record of your bets is personal, so it is worth being explicit about where it goes - which
+          is nowhere.</p>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h3>Your book stays on your machine</h3>
+          <p>One file in your own user folder. No account, no cloud copy, no telemetry.</p>
+        </div>
+        <div class="card">
+          <h3>No login, no keys</h3>
+          <p>It never asks for your Kalshi or Polymarket password or an API key, and never sees your
+            account.</p>
+        </div>
+        <div class="card">
+          <h3>Only public prices</h3>
+          <p>Update Prices reads the sites' public market data, naming only the markets you linked. Nothing
+            about you is sent with it.</p>
+        </div>
+        <div class="card">
+          <h3>It never places a bet</h3>
+          <p>Wager Book records wagers. It cannot buy, sell or move money, on either site.</p>
+        </div>
+        <div class="card">
+          <h3>Uninstall keeps the book</h3>
+          <p>Removing or upgrading the app leaves your wagers where they are.</p>
+        </div>
+        <div class="card">
+          <h3>Open source</h3>
+          <p>MIT licensed, and the <a href="https://github.com/Charette-AI-Group/wagerBook">full source</a>
+            is public, so anyone can check what it does.</p>
+        </div>
+      </div>
+      <p class="disclaimer">Wager Book is an independent tool and is not affiliated with, endorsed by or
+        connected to Kalshi or Polymarket. Prices are read from their public data as published and can be
+        delayed or wrong; nothing in the app or on this page is financial advice. Trade only what you can
+        afford to lose.</p>
+    </div>
+  </section>
+
+  <!-- -------------------------------------------------------- download -->
+  <section class="band" id="download">
+    <div class="wrap">
+      <div class="bandHead">
+        <h2>Download Wager Book 0.1.0</h2>
+        <p>Free, no account, no ads, no telemetry. You do not need Python or anything else installed.</p>
+      </div>
+
+      <div class="downloadGrid">
+        <div class="downloadCard">
+          <h3>Windows installer</h3>
+          <p>About 34&nbsp;MB. Installs for your user only, so there is no administrator prompt. Adds a
+            Start menu entry and an optional desktop shortcut.</p>
+          <a class="btn btnPrimary" href="https://github.com/Charette-AI-Group/wagerBook/releases/latest">
+            Download for Windows</a>
+        </div>
+        <div class="downloadCard">
+          <h3>Windows portable</h3>
+          <p>About 49&nbsp;MB zipped. Nothing is installed: unpack it anywhere, including a USB stick, and
+            run <code>WagerBook.exe</code>.</p>
+          <a class="btn btnGhost" href="https://github.com/Charette-AI-Group/wagerBook/releases/latest">
+            Portable zip</a>
+        </div>
+        <div class="downloadCard">
+          <h3>macOS</h3>
+          <p>About 38&nbsp;MB zipped. Unzip and move <code>WagerBook.app</code> to Applications. See the
+            <a href="#installing">note about Gatekeeper</a> before the first run.</p>
+          <a class="btn btnGhost" href="https://github.com/Charette-AI-Group/wagerBook/releases/latest">
+            Download for macOS</a>
+        </div>
+      </div>
+
+      <p class="fineprint">Every link opens the GitHub release page — scroll to <strong>Assets</strong>
+        and pick the file for your system. Each build is produced by a
+        <a href="https://github.com/Charette-AI-Group/wagerBook/blob/main/.github/workflows/build.yml">public
+        workflow</a> straight from the source, and checks itself before it is published.</p>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------- donate -->
+  <section class="band alt" id="donate">
+    <div class="wrap donate">
+      <h2>Support this work</h2>
+      <p>Wager Book is free. No ads, no account, no telemetry, and your book never leaves your machine
+        &mdash; the only thing it ever asks the internet for is the public price of a market you linked.
+        That is how a small desktop tool ought to work, and it is also why tools like it are hard to
+        sustain: there is no data to sell and no subscription to bill, so nothing pays for the work behind
+        them.</p>
+      <p>The hard part of a tool like this is not writing it, it is keeping it right. The sites change
+        their pages, their exports and their market data without notice, and a book is only useful while
+        its numbers can be trusted. Linking prices to the right exchange turned up that Polymarket US and
+        polymarket.com quote different prices for the same race &mdash; caught, fixed and covered by a test
+        before it misled anyone. That is the kind of attention a donation pays for, along with the next
+        free tool.</p>
+      <p>If Wager Book saved you a spreadsheet, or showed you how your wagers are really doing, please
+        consider chipping in.</p>
+      <div class="btnRow">
+        <a class="btn btnPrimary" href="https://www.paypal.com/donate/?hosted_button_id=FEM4WLD7LHY36"
+          target="_blank" rel="noopener">Donate</a>
+      </div>
+      <p class="fineprint">Secure payment through PayPal &mdash; no account required, any amount
+        appreciated. Thank you for supporting independent, privacy-respecting software.</p>
+    </div>
+  </section>
+
+  <footer class="siteFooter">
+    <div class="wrap">
+      <div>&copy; 2026 Charette AI Group, LLC &middot; Wager Book 0.1.0 &middot; MIT licensed</div>
+      <div>
+        <a href="https://github.com/Charette-AI-Group/wagerBook">Source</a> &middot;
+        <a href="https://github.com/Charette-AI-Group/wagerBook/releases/latest">Releases</a> &middot;
+        <a href="https://charette-ai-group.github.io/web/">More from Charette AI Group</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+
+</html>

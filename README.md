@@ -26,6 +26,9 @@ actually paid. PySide6, one JSON file, nothing sent anywhere.
 - The window reopens where it was last closed, at the same size; the Active / History tabs are
   large and the open one is underlined in the accent colour, as in the group's other apps
 
+**Website:** <https://charette-ai-group.github.io/wagerBook/> — screenshots, the full manual and
+the downloads, built from [`docs/`](docs/).
+
 The user manual is in [`docs/manual/README.md`](docs/manual/README.md), with the arithmetic.
 
 ## Download
