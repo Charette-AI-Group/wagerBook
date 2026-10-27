@@ -1,6 +1,6 @@
 [project]
 name = "wager-book"
-version = "0.1.0"
+version = "0.8.1"
 description = "Wager Book - a book of Kalshi and Polymarket wagers, open and closed (PySide6)"
 license = { text = "MIT" }
 requires-python = ">=3.14"

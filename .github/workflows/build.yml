@@ -5,13 +5,13 @@
 # publishes a GitHub Release with them attached, because release assets never
 # expire and workflow artifacts do:
 #
-#     git tag -a v0.1.0 -m "What changed" && git push origin v0.1.0
+#     git tag -a v0.8.2 -m "What changed" && git push origin v0.8.2
 #
 # The annotated tag's message becomes the release notes (see the release
 # job). git tag deletes lines starting with "#" by default, so for Markdown
 # headings in the notes, tag from a file with --cleanup=whitespace instead:
 #
-#     git tag -a v0.1.1 --cleanup=whitespace -F notes.md && git push origin v0.1.1
+#     git tag -a v0.8.2 --cleanup=whitespace -F notes.md && git push origin v0.8.2
 #
 # What each platform produces, and why they differ:
 #

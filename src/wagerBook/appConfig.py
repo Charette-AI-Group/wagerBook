@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 appName = "Wager Book"
-appVersion = "0.1.0"
+appVersion = "0.8.1"
 organizationName = "Charette-AI-Group"
 
 # Help > About contents
