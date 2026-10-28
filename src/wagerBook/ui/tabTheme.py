@@ -1,48 +1,24 @@
-"""The colours the main tabs are drawn in, for the light and the dark theme.
+"""The accent the open tab is marked with, for the light and the dark theme.
 
-The same values as the Charette AI Group's other apps (26theOneAssets), so the
-tabs look alike across them: quiet ink on a grey strip for the closed tabs,
-full ink on the window surface with an accent underline for the open one.
+The same indigo as the app icon and the website, and the same pair the
+Charette AI Group's other apps use for their open tab: deep on a light page,
+lifted on a dark one, where the deep shade would sink into the background.
+Everything else about a tab's colour comes from the window's own palette; see
+ui/widgets/tabStyling.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from dataclasses import dataclass
+from PySide6.QtGui import QColor
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QGuiApplication
-
-
-@dataclass(frozen=True)
-class TabTokens:
-    surface: str
-    """Behind the open tab: the window's own background."""
-    primaryInk: str
-    """The open tab's label, and any tab under the pointer."""
-    secondaryInk: str
-    """The other tabs' labels."""
-    strip: str
-    """Behind the closed tabs."""
-    accent: str
-    """The line under the open tab."""
+lightAccent = "#4a3aa7"
+darkAccent = "#9085e9"
 
 
-lightTokens = TabTokens(
-    surface="#fcfcfb", primaryInk="#0b0b0b", secondaryInk="#52514e",
-    strip="#e1e0d9", accent="#4a3aa7",
-)
-darkTokens = TabTokens(
-    surface="#1a1a19", primaryInk="#ffffff", secondaryInk="#c3c2b7",
-    strip="#2c2c2a", accent="#9085e9",
-)
+def accentFor(page: QColor) -> str:
+    """The accent that reads on this page colour.
 
-
-def currentTokens() -> TabTokens:
-    dark = QGuiApplication.styleHints().colorScheme() == Qt.ColorScheme.Dark
-    return darkTokens if dark else lightTokens
-
-
-def onColorSchemeChanged(slot: Callable[..., None]) -> None:
-    """Help > Theme and the Windows setting both arrive through this signal."""
-    QGuiApplication.styleHints().colorSchemeChanged.connect(slot)
+    Decided from the page itself rather than the colour-scheme setting, so it
+    can never be a theme behind the palette it is drawn against.
+    """
+    return darkAccent if page.lightnessF() < 0.5 else lightAccent
