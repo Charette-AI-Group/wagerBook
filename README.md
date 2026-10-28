@@ -133,7 +133,7 @@ because a release named after a version the app does not report leaves a bug rep
 unanswerable.
 
 ```powershell
-git tag -a v0.8.3 -m "What changed in this release" ; git push origin v0.8.3
+git tag -a v0.8.4 -m "What changed in this release" ; git push origin v0.8.4
 ```
 
 The tag's message becomes the release notes. `git tag` deletes lines starting with `#` by
@@ -141,7 +141,7 @@ default, so if the notes use Markdown headings, write them to a file and tag wit
 `--cleanup=whitespace` instead:
 
 ```powershell
-git tag -a v0.8.3 --cleanup=whitespace -F notes.md ; git push origin v0.8.3
+git tag -a v0.8.4 --cleanup=whitespace -F notes.md ; git push origin v0.8.4
 ```
 
 ## App icon
